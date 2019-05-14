@@ -1,0 +1,15 @@
+{
+  "generated": {
+    "events": ".\\Events",
+    "maps": ".\\Maps",
+    "models": ".\\Models",
+    "enums": ".\\Enums.json"
+  },
+  "connection": {
+    "chunk_size": 65536,
+    "server_to_client": "client_in",
+    "client_to_server": "client_out",
+    "environment": "MDEnvironment"
+  },
+  "log": "..\\log.txt"
+}
