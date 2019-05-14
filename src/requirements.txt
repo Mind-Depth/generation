@@ -1,0 +1,9 @@
+attrdict
+numpy
+pypiwin32
+PyQt5
+PyQt5-sip
+pyqtgraph
+pywin32
+qdarkstyle
+queuelib

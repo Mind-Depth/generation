@@ -1,0 +1,19 @@
+{
+  "generated": {
+    "maps": ".\\Maps",
+    "models": ".\\Models",
+    "enums": ".\\Enums.json"
+  },
+  "connection": {
+    "chunk_size": 65536,
+    "server_to_client": "client_in",
+    "client_to_server": "client_out",
+    "environment": "MDEnvironment",
+    "acquisition": "MDAcquisition"
+  },
+  "entry_point": {
+    "environment": "..\\..\\environnement_build\\EIP - Mind Depth.exe",
+    "acquisition": "..\\..\\acquisition\\Middleware\\py-test\\src\\Middleware.py"
+  },
+  "log": "..\\log.txt"
+}
