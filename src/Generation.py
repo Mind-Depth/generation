@@ -79,7 +79,7 @@ class Generation(ConnectionGroup):
         self.connected = set()
 
         # Minimal agreement in order to handshake with env
-        self.acq_message_type = AttrDict({key: key for key in {'CONTROL_SESSION', 'PROGRAM_STATE', 'FEAR_EVENT'}})
+        self.acq_message_type = AttrDict({key: key for key in {'INIT', 'CONTROL_SESSION', 'PROGRAM_STATE', 'FEAR_EVENT'}})
         self.env_enums = AttrDict({
             'QueueType': { 'Ping': 0 },
             'WatcherDataType': { 'Empty': 0 },
@@ -110,7 +110,8 @@ class Generation(ConnectionGroup):
         '''Starts the communication with the other parts'''
         self.gui_signals = gui_signals
         self.gui_signals.clientsConnected.emit()
-        self.alert_all_clients(True)
+        self.send_env_ping(True)
+        self.send_acq_init()
 
     def _stop(self):
         '''Stops the communication with the other parts'''
@@ -137,6 +138,9 @@ class Generation(ConnectionGroup):
 
     def send_acq_message(self, **kwargs):
         self.conns[Configuration.connection.acquisition].write(kwargs)
+
+    def send_acq_init(self):
+        self.send_acq_message(message_type=self.acq_message_type.INIT)
 
     def send_acq_control_session(self, ok=True):
         self.send_acq_message(message_type=self.acq_message_type.CONTROL_SESSION, status=ok)

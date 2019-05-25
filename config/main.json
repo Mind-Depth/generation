@@ -13,7 +13,9 @@
   },
   "entry_point": {
     "environment": "..\\..\\environnement_build\\EIP - Mind Depth.exe",
-    "acquisition": "..\\..\\acquisition\\Middleware\\py-test\\src\\Middleware.py"
+    "acquisition": "..\\..\\acquisition\\Middleware\\py-test\\src\\Middleware.py",
+    "orengine": "..\\..\\acquisition\\ORengine\\OnionRingEngineHTTPServer.py",
+    "android": "..\\..\\acquisition\\DataMocker\\DataMocker.py"
   },
   "log": "..\\log.txt"
 }
