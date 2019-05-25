@@ -88,6 +88,8 @@ class WindowLauncher(PyQtToolBox.Window):
                    Configuration.connection.acquisition,
                    Configuration.connection.server_to_client,
                    Configuration.connection.client_to_server)
+    ORE_CMD = _cmd(1, 'python', Configuration.entry_point.orengine)
+    ANDROID_CMD = _cmd(1, 'python', Configuration.entry_point.android)
 
     class MockableWindow:
 
@@ -161,6 +163,14 @@ class WindowLauncher(PyQtToolBox.Window):
         self.win_algo = WindowAlgo(self)
         self.env = self.MockableWindow(WindowFakeEnv(self, 'Environment'), self.ENV_CMD)
         self.acq = self.MockableWindow(WindowFakeAcq(self, 'Biofeedback'), self.ACQ_CMD)
+        self.ore = None
+        self.android = None
+
+        def close(self):
+            self.win.close()
+            if self.thread is not None:
+                self.thread.stop()
+                self.thread.join()
 
         # Logo
         self.layout.addWidget(PyQtToolBox.Image(r'images\logo.png', width=self.WIDTH))
@@ -200,6 +210,14 @@ class WindowLauncher(PyQtToolBox.Window):
                 button.setEnabled(False)
             mockable.start(self.menu_layout)
 
+        # Starts the server
+        self.ore = ThreadedCommand(self.ORE_CMD[0], 'OREngine', self.ORE_CMD[1])
+        self.ore.start()
+
+        # Starts the android mock
+        self.android = ThreadedCommand(self.ANDROID_CMD[0], 'Android', self.ANDROID_CMD[1])
+        self.android.start()
+
         # Starts the Generation
         self.gen.start(thread=True, gui_signals=self)
 
@@ -209,6 +227,12 @@ class WindowLauncher(PyQtToolBox.Window):
         self.win_algo.close()
         for mockable in (self.env, self.acq):
             mockable.close()
+        if self.ore is not None:
+            self.ore.stop()
+            self.ore.join()
+        if self.android is not None:
+            self.android.stop()
+            self.android.join()
 
     def closeEvent(self, event):
         self.close_all()
