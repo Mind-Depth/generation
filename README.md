@@ -37,8 +37,8 @@ python -m venv .venv
 #### 5 - Install the dependencies
 
 ```
-pip install -r acquisition\requirements.txt
-pip install -r acquisition\Middleware\py-test\requirements.txt
+pip install -r acquisition\ORengine\requirements.txt
+pip install -r acquisition\Middleware\py-test\src\requirements.txt
 pip install -r generation\src\requirements.txt
 ```
 
