@@ -121,8 +121,11 @@ class WindowLauncher(PyQtToolBox.Window):
             # Wait label
             self.wait = PyQtToolBox.Title(f'{self.name} handshake incomplete (waiting)')
 
+        def mode(self):
+            return self.radio_layout.radio.checkedId()
+
         def start(self, button_layout):
-            mode = self.radio_layout.radio.checkedId()
+            mode = self.mode()
 
             if mode == self.RADIO_MODE.Mocked:
                 self.mocked = True
@@ -210,13 +213,15 @@ class WindowLauncher(PyQtToolBox.Window):
                 button.setEnabled(False)
             mockable.start(self.menu_layout)
 
-        # Starts the server
-        self.ore = ThreadedCommand(self.ORE_CMD[0], 'OREngine', self.ORE_CMD[1])
-        self.ore.start()
+        if self.acq.mode() == self.acq.RADIO_MODE.Automatic:
 
-        # Starts the android mock
-        self.android = ThreadedCommand(self.ANDROID_CMD[0], 'Android', self.ANDROID_CMD[1])
-        self.android.start()
+            # Starts the server
+            self.ore = ThreadedCommand(self.ORE_CMD[0], 'OREngine', self.ORE_CMD[1])
+            self.ore.start()
+
+            # Starts the android mock
+            self.android = ThreadedCommand(self.ANDROID_CMD[0], 'Android', self.ANDROID_CMD[1])
+            self.android.start()
 
         # Starts the Generation
         self.gen.start(thread=True, gui_signals=self)

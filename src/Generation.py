@@ -272,6 +272,10 @@ class Generation(ConnectionGroup):
 
         assert qtype == self.env_enums.QueueType.Data, obj
 
+        ## TODO
+        # Solve the timestamp incompatibility with Unity
+        obj.time = int(time.time())
+
         # Room management
 
         if wtype == self.env_enums.WatcherDataType.ChangedRoom:
