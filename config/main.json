@@ -1,5 +1,6 @@
 {
   "generated": {
+    "events": ".\\Events",
     "maps": ".\\Maps",
     "models": ".\\Models",
     "enums": ".\\Enums.json"
