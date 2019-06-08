@@ -20,6 +20,7 @@ class Connection:
     def __init__(self, name):
         '''Creates pipes objects'''
         self.name = name
+        self.running = False
         self.log = logging.getLogger(f'Connection({self.name})')
         self.pipe_in = win32pipe.CreateNamedPipe(
             r'\\.\pipe\{}_{}'.format(self.name, Configuration.connection.client_to_server),
@@ -34,6 +35,17 @@ class Connection:
         self.pipes = [self.pipe_in, self.pipe_out]
         self.log.info('Created')
 
+    def _hide_legitimate_errors(f):
+        def func(self, *args, **kwargs):
+            try:
+                return f(self, *args, **kwargs)
+            except pywintypes.error as e:
+                if self.running:
+                    raise
+        func.__name__ = f.__name__
+        return func
+
+    @_hide_legitimate_errors
     def read(self):
         '''Reads a json object'''
         error, msg = win32file.ReadFile(self.pipe_in, Configuration.connection.chunk_size)
@@ -42,6 +54,7 @@ class Connection:
         self.log.info(f'Recv:{s}')
         return None if not s else AttrDict(json.loads(s))
 
+    @_hide_legitimate_errors
     def write(self, msg):
         '''Writes a json object'''
         s = json.dumps(msg)
@@ -51,6 +64,7 @@ class Connection:
     def start(self):
         '''Connects pipes'''
         self.log.info('Blocked')
+        self.running = True
         overlapped = pywintypes.OVERLAPPED()
         for pipe in self.pipes:
             win32pipe.ConnectNamedPipe(pipe, overlapped)
@@ -62,6 +76,9 @@ class Connection:
 
     def stop(self):
         '''Closes pipes'''
+        if not self.running:
+            return
+        self.running = False
         for pipe in self.pipes:
             win32file.CloseHandle(pipe)
         self.log.info('Stopped')

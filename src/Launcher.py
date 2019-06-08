@@ -228,6 +228,7 @@ class WindowLauncher(PyQtToolBox.Window):
 
     def close_all(self):
         '''Closes all the other windows'''
+        self.gen.stop()
         self.win_game.close()
         self.win_algo.close()
         for mockable in (self.env, self.acq):
