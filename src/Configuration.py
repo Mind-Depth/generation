@@ -52,6 +52,7 @@ class EnvConfig(AttrDict):
     def load_generated(self):
         '''Loads part of the configuration that was generated after the start of the program'''
         loaded = AttrDict()
+        loaded.events = self._list_configs(self.generated.events)
         loaded.models = self._list_configs(self.generated.models)
         loaded.maps = self._list_configs(self.generated.maps)
         with open(os.path.join(self.ROOT, self.generated.enums), 'r') as f:

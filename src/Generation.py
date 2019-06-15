@@ -81,7 +81,8 @@ class Generation(ConnectionGroup):
         # Minimal agreement in order to handshake with env
         self.acq_message_type = AttrDict({key: key for key in {'INIT', 'CONTROL_SESSION', 'PROGRAM_STATE', 'FEAR_EVENT'}})
         self.env_enums = AttrDict({
-            'QueueType': { 'Ping': 0 },
+            'QueueTypeGeneration': { 'Ping': 0 },
+            'QueueTypeWatcher': { 'Ping': 0 },
             'WatcherDataType': { 'Empty': 0 },
         })
 
@@ -119,7 +120,11 @@ class Generation(ConnectionGroup):
         Configuration.remove_generated()
 
     def _update(self):
-        '''Pops elements from the queue and calls the right callback'''
+        '''Mainloop of the generation'''
+
+        self.handle_env_real_time_events()
+
+        # Pop elements from the queue to call the right callback
 
         try:
             who, obj = self.q.get(block=True, timeout=1) # Wait for data
@@ -145,20 +150,25 @@ class Generation(ConnectionGroup):
     def send_acq_control_session(self, ok=True):
         self.send_acq_message(message_type=self.acq_message_type.CONTROL_SESSION, status=ok)
 
-    def send_env_message(self, queueType=0, message='', idsAssets=[], idMapAsset=-1, idMapInstance=-1):
+    def send_env_message(self, queueType=0, message='',
+                         idsAssets=[], idsEvents=[],
+                         idMapAsset=-1, idMapInstance=-1,
+                         idEventToTrigger=-1):
         self.conns[Configuration.connection.environment].write({
             'queueType': queueType,
             'message': message,
             'idsAssets': idsAssets,
+            'idsEvents': idsEvents,
             'idMapAsset': idMapAsset,
             'idMapInstance': idMapInstance,
+            'idEventToTrigger': idEventToTrigger,
         })
 
     def send_env_ping(self, ok=True):
         msg = 'OK' if ok else 'KO'
-        self.send_env_message(queueType=self.env_enums.QueueType.Ping, message=msg)
+        self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Ping, message=msg)
 
-    def send_env_room(self, chosen_assets, chosen_map):
+    def send_env_room(self, chosen_assets, chosen_map, chosen_waitable_events, chosen_triggerable_events):
         '''Sends the selected map and assets and saves them to be able to track their effect afterward'''
 
         # Sanity check
@@ -166,25 +176,37 @@ class Generation(ConnectionGroup):
         assert room_id not in self.rooms, f'Duplicate Room ID "{chosen_map.instance_id}"'
 
         # Keep track
+        copy = lambda l: [AttrDict(ad) for ad in l]
         t = int(time.time())
         self.rooms[room_id] = AttrDict({
             'created': t,
             'deleted': None,
             'entered': None,
             'assets': chosen_assets,
+            'waitable_events': copy(chosen_waitable_events),
+            'triggerable_events': copy(chosen_triggerable_events),
             'map': chosen_map,
             'active_times': [t],
         })
         self.current_map = chosen_map.id
 
         # Broadcast
+        get_ids = lambda l: [e.id for e in l]
         self.send_env_message(
-            queueType = self.env_enums.QueueType.Data,
-            idsAssets = [a.id for a in chosen_assets],
-            idMapAsset = chosen_map.id,
+            queueType=self.env_enums.QueueTypeGeneration.Assets,
+            idsAssets=get_ids(chosen_assets),
+            idsEvents=get_ids(chosen_waitable_events + chosen_triggerable_events),
+            idMapAsset=chosen_map.id,
             idMapInstance=room_id
         )
         self.gui_signals.refreshGame.emit()
+
+    def send_env_event(self, event, power):
+        self.send_env_message(
+            queueType=self.env_enums.QueueTypeGeneration.Event,
+            idEventToTrigger=event.id,
+            message=power,
+        )
 
     def alert_all_clients(self, ok=True):
         '''Sends the current program state to the other parts'''
@@ -256,6 +278,18 @@ class Generation(ConnectionGroup):
         if fears and not self.ui_forced_fears:
             self.gui_signals.reloadGeneration.emit()
 
+    def handle_env_real_time_events(self):
+        '''Triggers environment events'''
+
+        if self.current_room is None:
+            return
+
+        # TODO real processing
+        room = self.rooms.get(self.current_room)
+        if room.triggerable_events:
+            event, *room.triggerable_events = room.triggerable_events
+            self.send_env_event(event, event.min)
+
     def handle_env_msg(self, obj):
         '''Redirects messages to the right handler'''
 
@@ -265,12 +299,17 @@ class Generation(ConnectionGroup):
         msg = obj.message
 
         # Simple handshake
-        if qtype == self.env_enums.QueueType.Ping:
+        if qtype == self.env_enums.QueueTypeWatcher.Ping:
             assert wtype == self.env_enums.WatcherDataType.Empty, f'Watchers should not send pings: {obj}'
             assert msg == 'OK', f'Environment encountered an error: {obj}'
             return self.handle_env_ping()
 
-        assert qtype == self.env_enums.QueueType.Data, obj
+        assert qtype == self.env_enums.QueueTypeWatcher.Data, obj
+
+        # Event management
+
+        if wtype == self.env_enums.WatcherDataType.TriggerableEvent:
+            return self.handle_env_triggerable_event(msg)
 
         # Room management
 
@@ -310,13 +349,23 @@ class Generation(ConnectionGroup):
             self.load_env_config
         )
 
-    # Callbacks for lower functions
+    # Callbacks for following functions
+
+    def _intersection(self, a, b):
+        return len(set(a).intersection(b)) > 0
 
     def _can_use_map(self, m):
         return self.current_map not in m.banned_ids
 
-    def _can_use_asset(self, m, a):
-        return len(m.fears.intersection(a.fears)) > 0
+    def _can_use_asset(self, m, asset):
+        return self._intersection(m.fears, asset.fears)
+
+    def _can_use_event(self, map_id, asset_ids, event):
+        return (
+            (not event.id_assets_needed or self._intersection(asset_ids, event.id_assets_needed))
+            and
+            (not event.id_maps_needed or map_id in event.id_maps_needed)
+        )
 
     def _compute_score(self, obj):
         fears = self.ui_fears if self.ui_forced_fears else self.fears
@@ -331,8 +380,8 @@ class Generation(ConnectionGroup):
         )
 
     def get_assets_proposition(self, map_ref):
-        def usable(a):
-            return self._can_use_asset(map_ref, a)
+        def usable(asset):
+            return self._can_use_asset(map_ref, asset)
         return [
             random_choice_using_score(
                 cat.assets,
@@ -342,6 +391,16 @@ class Generation(ConnectionGroup):
                 maxi=cat.use_max
             ) for cat in map_ref.categories_config
         ]
+
+    def get_events_proposition(self, map_ref, assets_ref):
+        map_id = map_ref.id
+        asset_ids = [asset.id for asset in assets_ref]
+        def usable(event):
+            return self._can_use_event(map_id, asset_ids, event)
+        events = sorted(filter(usable, self.events), key=self._compute_score, reverse=True)
+        waitables = list(filter(lambda event: event.wait_for_trigger, events))
+        triggerables = list(filter(lambda event: not event.wait_for_trigger, events))
+        return waitables, triggerables
 
     def handle_env_request_room(self):
         '''Callback for messages of type RequestRoom'''
@@ -357,12 +416,27 @@ class Generation(ConnectionGroup):
         best_assets = []
         for _, _, assets in self.get_assets_proposition(best_map):
             best_assets.extend(assets)
-        self.send_env_room(best_assets, best_map)
+        waitable_events, triggerable_events = self.get_events_proposition(best_map, best_assets)
+        # TODO find how to determine event subsets
+        self.send_env_room(best_assets, best_map, waitable_events[:1], triggerable_events[:2])
 
     def _add_room_activity(self, room, t):
         times = room['active_times']
         assert not times or times[-1] <= t, (room, t)
         times.append(t)
+
+    def handle_env_triggerable_event(self, event_id):
+        # TODO Clean fonction
+        # TODO decide whether to tigger or not
+        current = self.rooms.get(self.current_room)
+        event = None
+        for triggerable_event in current.triggerable_events:
+            if triggerable_event.id == event_id:
+                event = triggerable_event
+                break
+        if event is not None:
+            # TODO determine event power
+            self.send_env_event(event, event.min)
 
     def handle_env_changed_room(self, t, room_id):
         '''Callback for messages of type ChangedRoom'''
@@ -421,6 +495,7 @@ class Generation(ConnectionGroup):
         Configuration.load_generated()
 
         # Fills internal mapping type->assets
+        self.events = list(Configuration.loaded.events)
         self.assets = list(Configuration.loaded.models)
         self.maps = list(Configuration.loaded.maps)
         self.current_map = -1
@@ -500,7 +575,7 @@ class Generation(ConnectionGroup):
     def ui_send_room(self, chosen_assets, chosen_map):
         if self.room_requests:
             self.room_requests -= 1
-            self.send_env_room(chosen_assets, chosen_map)
+            self.send_env_room(chosen_assets, chosen_map, [], []) # TODO send events
             self.gui_signals.requestRoom.emit()
 
 if __name__ == '__main__':
