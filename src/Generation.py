@@ -288,7 +288,7 @@ class Generation(ConnectionGroup):
         room = self.rooms.get(self.current_room)
         if room.triggerable_events:
             event, *room.triggerable_events = room.triggerable_events
-            self.send_env_event(event, event.min)
+            self.send_env_event(event, event.max)
 
     def handle_env_msg(self, obj):
         '''Redirects messages to the right handler'''
@@ -436,7 +436,7 @@ class Generation(ConnectionGroup):
                 break
         if event is not None:
             # TODO determine event power
-            self.send_env_event(event, event.min)
+            self.send_env_event(event, event.max)
 
     def handle_env_changed_room(self, t, room_id):
         '''Callback for messages of type ChangedRoom'''
