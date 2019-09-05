@@ -1,6 +1,7 @@
 #
 
 import os
+import sys
 import logging
 import qdarkstyle
 import PyQtToolBox
@@ -84,12 +85,12 @@ class WindowLauncher(PyQtToolBox.Window):
     WIDTH = 500
     HEIGHT = 500
     ENV_CMD = _cmd(0, Configuration.entry_point.environment)
-    ACQ_CMD = _cmd(1, 'python', Configuration.entry_point.acquisition,
+    ACQ_CMD = _cmd(1, sys.executable, Configuration.entry_point.acquisition,
                    Configuration.connection.acquisition,
                    Configuration.connection.server_to_client,
                    Configuration.connection.client_to_server)
-    ORE_CMD = _cmd(1, 'python', Configuration.entry_point.orengine)
-    ANDROID_CMD = _cmd(1, 'python', Configuration.entry_point.android)
+    ORE_CMD = _cmd(1, sys.executable, Configuration.entry_point.orengine)
+    ANDROID_CMD = _cmd(1, sys.executable, Configuration.entry_point.android)
 
     class MockableWindow:
 
