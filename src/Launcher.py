@@ -90,7 +90,6 @@ class WindowLauncher(PyQtToolBox.Window):
                    Configuration.connection.server_to_client,
                    Configuration.connection.client_to_server)
     ORE_CMD = _cmd(2, sys.executable, '-u', Configuration.entry_point.orengine)
-    ANDROID_CMD = _cmd(2, sys.executable, '-u', Configuration.entry_point.android)
 
     class MockableWindow:
 
@@ -168,7 +167,6 @@ class WindowLauncher(PyQtToolBox.Window):
         self.env = self.MockableWindow(WindowFakeEnv(self, 'Environment'), self.ENV_CMD)
         self.acq = self.MockableWindow(WindowFakeAcq(self, 'Biofeedback'), self.ACQ_CMD)
         self.ore = None
-        self.android = None
 
         def close(self):
             self.win.close()
@@ -189,12 +187,17 @@ class WindowLauncher(PyQtToolBox.Window):
         self.menu_layout = QtW.QVBoxLayout()
         self.menu_layout.setAlignment(QtCore.Qt.AlignVCenter)
         self.start = QtW.QPushButton('Start')
+        self.restart = QtW.QPushButton('Restart')
         self.scene = QtW.QPushButton('Show Game State')
         self.algo = QtW.QPushButton('Show Algorithm State')
+        self.quit = QtW.QPushButton('Quit')
         self.start.clicked.connect(self.start_all)
+        self.restart.clicked.connect(self.restart_all)
         self.scene.clicked.connect(self.win_game.show)
         self.algo.clicked.connect(self.win_algo.show)
-        for button in (self.start, self.scene, self.algo):
+        self.quit.clicked.connect(self.close)
+        self.restart.setEnabled(False)
+        for button in (self.start, self.restart, self.scene, self.algo, self.quit):
             self.menu_layout.addWidget(button)
         self.layout.addLayout(self.menu_layout)
 
@@ -204,11 +207,17 @@ class WindowLauncher(PyQtToolBox.Window):
 
         self.show()
 
+    def restart_all(self):
+        # TODO All
+        self.gen.reset()
+        self.refreshGame.emit()
+
     def start_all(self):
         '''Starts every parts of the project'''
 
         # Freeze settings and start mocks
         self.start.setEnabled(False)
+        self.restart.setEnabled(True)
         for mockable in (self.env, self.acq):
             for button in mockable.radio_layout.radio.buttons:
                 button.setEnabled(False)
@@ -219,10 +228,6 @@ class WindowLauncher(PyQtToolBox.Window):
             # Starts the server
             self.ore = ThreadedCommand(self.ORE_CMD[0], 'OREngine', self.ORE_CMD[1])
             self.ore.start()
-
-            # Starts the android mock
-            self.android = ThreadedCommand(self.ANDROID_CMD[0], 'Android', self.ANDROID_CMD[1])
-            self.android.start()
 
         # Starts the Generation
         self.gen.start(thread=True, gui_signals=self)
@@ -237,9 +242,6 @@ class WindowLauncher(PyQtToolBox.Window):
         if self.ore is not None:
             self.ore.stop()
             self.ore.join()
-        if self.android is not None:
-            self.android.stop()
-            self.android.join()
 
     def closeEvent(self, event):
         self.close_all()

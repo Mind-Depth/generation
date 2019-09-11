@@ -15,11 +15,13 @@ class FakeEnums:
         return AttrDict({key: value for value, key in enumerate(values)})
 
     Fears = _make_attr_dict('Arachnophobia', 'Acrophobia', 'Nyctophobia', 'Claustrophobia')
-    QueueType = _make_attr_dict('Ping', 'Data')
+    QueueTypeWatcher = _make_attr_dict('Ping', 'Data')
+    QueueTypeGeneration = _make_attr_dict('Ping', 'Assets', 'Event')
     ObjectType = _make_attr_dict('Ground', 'Wall', 'Light', 'SpiderSpawner')
     WatcherDataType = _make_attr_dict(
         'Empty', 'RequestRoom', 'ChangedRoom', 'DeletedRoom',
-        'ActivePlayer', 'PassivePlayer', 'ActivePlayerInteraction', 'PassivePlayerInteraction'
+        'ActivePlayer', 'PassivePlayer', 'ActivePlayerInteraction', 'PassivePlayerInteraction',
+        'TriggerableEvent'
     )
 
     def _make_kv_pairs(enum):
@@ -27,7 +29,8 @@ class FakeEnums:
 
     DUMPABLE = {
         'Fears': _make_kv_pairs(Fears),
-        'QueueType': _make_kv_pairs(QueueType),
+        'QueueTypeWatcher': _make_kv_pairs(QueueTypeWatcher),
+        'QueueTypeGeneration': _make_kv_pairs(QueueTypeGeneration),
         'ObjectType': _make_kv_pairs(ObjectType),
         'WatcherDataType': _make_kv_pairs(WatcherDataType),
     }
@@ -64,7 +67,7 @@ class EnvConnectionMock(ConnectionMock):
     def queue_data(self, type_name, **kw):
         '''Mocks a message created by a given watcher type'''
         watcher = FakeEnums.WatcherDataType[type_name]
-        self.queue_message(queueType=FakeEnums.QueueType.Data, watcherType=watcher, **kw)
+        self.queue_message(queueType=FakeEnums.QueueTypeWatcher.Data, watcherType=watcher, **kw)
 
     def _sender(name, arg_name=None):
         '''Simplifies watchers mocking right below the function'''
@@ -183,9 +186,20 @@ class WindowFakeEnv(PyQtToolBox.Window):
         for obj in random_objects(Configuration.generated.maps, 'map', (5, 10), (1, 4)):
             obj.banned_ids = []
             obj.categories_config = [
-                {'type': obj_type, 'use_min': random.randint(0, 2), 'use_max': random.randint(3, 10)}
+                {'type': obj_type, 'use_min': random.randint(0, 2), 'use_max': random.randint(3, 4)}
                 for obj_type in FakeEnums.ObjectType.values()
             ]
+
+        # Events
+        for obj in random_objects(Configuration.generated.events, 'map', (5, 10), (1, 4)):
+			# TODO more random configuration
+            obj.assets_needed = []
+            obj.maps_needed = []
+            obj.min_power = 0
+            obj.max_power = 100
+            obj.wait_for_trigger = False
+            obj.cooldown = 0
+            obj.maximum_use = 0
 
     def start(self):
         '''Emulates a handshake'''

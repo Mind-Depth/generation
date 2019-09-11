@@ -95,6 +95,10 @@ class Generation(ConnectionGroup):
         self.maps = []
         self.assets = []
 
+        self.reset()
+
+    def reset(self):
+
         # Rooms
         self.rooms = {}
         self.room_requests = 0
@@ -288,7 +292,7 @@ class Generation(ConnectionGroup):
         room = self.rooms.get(self.current_room)
         if room.triggerable_events:
             event, *room.triggerable_events = room.triggerable_events
-            self.send_env_event(event, event.max)
+            self.send_env_event(event, event.max_power)
 
     def handle_env_msg(self, obj):
         '''Redirects messages to the right handler'''
@@ -362,9 +366,9 @@ class Generation(ConnectionGroup):
 
     def _can_use_event(self, map_id, asset_ids, event):
         return (
-            (not event.id_assets_needed or self._intersection(asset_ids, event.id_assets_needed))
+            (not event.assets_needed or self._intersection(asset_ids, event.assets_needed))
             and
-            (not event.id_maps_needed or map_id in event.id_maps_needed)
+            (not event.maps_needed or map_id in event.maps_needed)
         )
 
     def _compute_score(self, obj):
@@ -426,7 +430,7 @@ class Generation(ConnectionGroup):
         times.append(t)
 
     def handle_env_triggerable_event(self, event_id):
-        # TODO Clean fonction
+        # TODO clean function
         # TODO decide whether to tigger or not
         current = self.rooms.get(self.current_room)
         event = None
@@ -436,7 +440,7 @@ class Generation(ConnectionGroup):
                 break
         if event is not None:
             # TODO determine event power
-            self.send_env_event(event, event.max)
+            self.send_env_event(event, event.max_power)
 
     def handle_env_changed_room(self, t, room_id):
         '''Callback for messages of type ChangedRoom'''
