@@ -191,12 +191,12 @@ class WindowFakeEnv(PyQtToolBox.Window):
             ]
 
         # Events
-        for obj in random_objects(Configuration.generated.events, 'map', (5, 10), (1, 4)):
+        for obj in random_objects(Configuration.generated.events, 'event', (5, 10), (1, 2)):
 			# TODO more random configuration
-            obj.assets_needed = []
-            obj.maps_needed = []
-            obj.min_power = 0
-            obj.max_power = 100
+            obj.id_assets_needed = []
+            obj.id_maps_needed = []
+            obj.min = random.randint(0, 40)
+            obj.max = random.randint(60, 100)
             obj.wait_for_trigger = False
             obj.cooldown = 0
             obj.maximum_use = 0

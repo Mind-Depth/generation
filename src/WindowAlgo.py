@@ -120,6 +120,10 @@ class WindowAlgo(PyQtToolBox.Window):
             self.sliders = {}
             self._force_ui_on_manual = self.root.gen.ui_force_fears
 
+            # TODO
+            self.events = PyQtToolBox.ScrollableArea(QtW.QVBoxLayout)
+            self.addWidget(self.events)
+
         def _slider_changed(self, key):
             if self.is_auto():
                 return
@@ -146,6 +150,18 @@ class WindowAlgo(PyQtToolBox.Window):
                 label.setText(key)
                 self.scroll.layout.addRow(label, slider)
             self._enable_on_manual.extend(self.sliders.values())
+            
+            # TODO
+            import random
+            for event in self.root.gen.ui_get_events():
+                layout = QtW.QVBoxLayout()
+                layout.addWidget(QtW.QLabel(f'{event.description} [{event.min} - {event.max}]'))
+                button = QtW.QPushButton('Trigger')
+                layout.addWidget(button)
+                self.events.layout.addLayout(layout)
+                def callback(*args, event=event):
+                    self.root.gen.ui_send_event(event, random.randint(event.min, event.max))
+                button.clicked.connect(callback)
 
     @PyQtToolBox.ui_factory(Room, 30)
     class LayoutRoom(PyQtToolBox.LoadableControlLayout):
@@ -273,7 +289,7 @@ class WindowAlgo(PyQtToolBox.Window):
         self.layout_rooms = self.LayoutRoom(self.root)
         self.layout_rooms.room_preprocess()
         self.layout.addWidget(PyQtToolBox.Colored(self.layout_fear, background=self.FEAR_BGCOLOR), 1)
-        self.layout.addWidget(PyQtToolBox.Colored(self.layout_rooms, background=self.ROOM_BGCOLOR), 5)
+        self.layout.addWidget(PyQtToolBox.Colored(self.layout_rooms, background=self.ROOM_BGCOLOR), 4)
 
     # Signal callbacks
 

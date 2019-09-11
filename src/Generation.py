@@ -289,10 +289,10 @@ class Generation(ConnectionGroup):
             return
 
         # TODO real processing
-        room = self.rooms.get(self.current_room)
-        if room.triggerable_events:
-            event, *room.triggerable_events = room.triggerable_events
-            self.send_env_event(event, event.max_power)
+        #room = self.rooms.get(self.current_room)
+        #if room.triggerable_events:
+        #    event, *room.triggerable_events = room.triggerable_events
+        #    self.send_env_event(event, event.max)
 
     def handle_env_msg(self, obj):
         '''Redirects messages to the right handler'''
@@ -366,9 +366,9 @@ class Generation(ConnectionGroup):
 
     def _can_use_event(self, map_id, asset_ids, event):
         return (
-            (not event.assets_needed or self._intersection(asset_ids, event.assets_needed))
+            (not event.id_assets_needed or self._intersection(asset_ids, event.id_assets_needed))
             and
-            (not event.maps_needed or map_id in event.maps_needed)
+            (not event.id_maps_needed or map_id in event.id_maps_needed)
         )
 
     def _compute_score(self, obj):
@@ -440,7 +440,7 @@ class Generation(ConnectionGroup):
                 break
         if event is not None:
             # TODO determine event power
-            self.send_env_event(event, event.max_power)
+            self.send_env_event(event, event.max)
 
     def handle_env_changed_room(self, t, room_id):
         '''Callback for messages of type ChangedRoom'''
@@ -552,6 +552,10 @@ class Generation(ConnectionGroup):
             return {}
         return {self.reverse_enums.Fears[k]: v for k, v in self.fears.items()}
 
+    # TODO
+    def ui_get_events(self):
+        return self.events
+
     def ui_set_fear(self, key, value):
         self.ui_fears[self.env_enums.Fears[key]] = value
 
@@ -581,6 +585,10 @@ class Generation(ConnectionGroup):
             self.room_requests -= 1
             self.send_env_room(chosen_assets, chosen_map, [], []) # TODO send events
             self.gui_signals.requestRoom.emit()
+
+    # TODO
+    def ui_send_event(self, event, power):
+        self.send_env_event(event, power)
 
 if __name__ == '__main__':
     with Generation() as gen:
