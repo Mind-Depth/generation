@@ -1,5 +1,4 @@
 #
-
 import time
 import queue
 import random
@@ -196,21 +195,17 @@ class Generation(ConnectionGroup):
 
         # Broadcast
         get_ids = lambda l: [e.id for e in l]
-        self.send_env_message(
-            queueType=self.env_enums.QueueTypeGeneration.Assets,
+        self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Assets,
             idsAssets=get_ids(chosen_assets),
             idsEvents=get_ids(chosen_waitable_events + chosen_triggerable_events),
             idMapAsset=chosen_map.id,
-            idMapInstance=room_id
-        )
+            idMapInstance=room_id)
         self.gui_signals.refreshGame.emit()
 
     def send_env_event(self, event, power):
-        self.send_env_message(
-            queueType=self.env_enums.QueueTypeGeneration.Event,
+        self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Event,
             idEventToTrigger=event.id,
-            message=power,
-        )
+            message=power,)
 
     def alert_all_clients(self, ok=True):
         '''Sends the current program state to the other parts'''
@@ -218,8 +213,10 @@ class Generation(ConnectionGroup):
             if ok:
                 f(ok)
                 continue
-            # In some cases, clients stop before the server (e.g. if they encountered an internal error)
-            # Sending errors are irrelevant at this point because the message is for them to stop anyway.
+            # In some cases, clients stop before the server (e.g.  if they
+            # encountered an internal error)
+            # Sending errors are irrelevant at this point because the message
+            # is for them to stop anyway.
             try:
                 f(ok)
             except Exception:
@@ -257,11 +254,9 @@ class Generation(ConnectionGroup):
         raise ValueError(f'Acquisition sent an invalid type "{mtype}": {obj}')
 
     def handle_acq_program_state(self):
-        self.handle_alive_connection(
-            Configuration.connection.acquisition,
+        self.handle_alive_connection(Configuration.connection.acquisition,
             self.send_acq_control_session,
-            self.gui_signals.acqHandshake.emit
-        )
+            self.gui_signals.acqHandshake.emit)
 
     def handler_acq_fear_event(self, obj):
         # TODO real computation
@@ -346,12 +341,10 @@ class Generation(ConnectionGroup):
         raise ValueError(f'Environment sent an invalid type "{wtype}": {obj}')
 
     def handle_env_ping(self):
-        self.handle_alive_connection(
-            Configuration.connection.environment,
+        self.handle_alive_connection(Configuration.connection.environment,
             self.send_env_ping,
             self.gui_signals.envHandshake.emit,
-            self.load_env_config
-        )
+            self.load_env_config)
 
     # Callbacks for following functions
 
@@ -365,35 +358,36 @@ class Generation(ConnectionGroup):
         return self._intersection(m.fears, asset.fears)
 
     def _can_use_event(self, map_id, asset_ids, event):
-        return (
-            (not event.id_assets_needed or self._intersection(asset_ids, event.id_assets_needed))
-            and
-            (not event.id_maps_needed or map_id in event.id_maps_needed)
-        )
+        return ((not event.id_assets_needed or self._intersection(asset_ids, event.id_assets_needed)) and (not event.id_maps_needed or map_id in event.id_maps_needed))
 
     def _compute_score(self, obj):
         fears = self.ui_fears if self.ui_forced_fears else self.fears
         return sum(fears[fear] for fear in obj.fears)
 
     def get_map_proposition(self):
-        return random_choice_using_score(
-            self.maps,
+        #DEMO
+        self.room_idx += 1
+        if self.room_idx == 1:
+            m = list(filter(lambda m: self.env_enums.Fears.Vertigo in m.fears, self.maps))[0]
+        elif self.room_idx == 2:
+            m = list(filter(lambda m: self.env_enums.Fears.Arachnophobia in m.fears, self.maps))[0]
+        else:
+            m = sorted([(map, self._compute_score(map)) for map in self.maps], key=lambda kv: kv[1], reverse=True)[0][0]
+        a, b, c = random_choice_using_score(self.maps,
             self._compute_score,
             filter_callback=self._can_use_map,
-            as_list=False
-        )
+            as_list=False)
+        return a, b, m
 
     def get_assets_proposition(self, map_ref):
         def usable(asset):
             return self._can_use_asset(map_ref, asset)
         return [
-            random_choice_using_score(
-                cat.assets,
+            random_choice_using_score(cat.assets,
                 self._compute_score,
                 filter_callback=usable,
                 mini=cat.use_min,
-                maxi=cat.use_max
-            ) for cat in map_ref.categories_config
+                maxi=cat.use_max) for cat in map_ref.categories_config
         ]
 
     def get_events_proposition(self, map_ref, assets_ref):
@@ -535,7 +529,53 @@ class Generation(ConnectionGroup):
         self.fears = {fear: 0 for fear in self.reverse_enums.Fears}
         self.ui_fears = dict(self.fears)
 
+        #DEMO
+        t = time.time()
+        self.rooms['demo-1'] = AttrDict({
+            'created': t - 120,
+            'deleted': t - 30,
+            'entered': None,
+            'assets': [random.choice(self.assets) for i in range(4)],
+            'waitable_events': [],
+            'triggerable_events': [],
+            'map': random.choice(self.maps),
+            'active_times': [t - 120, t - 120, t - 90, t - 60, t - 30],
+        })
+        self.rooms['demo-2'] = AttrDict({
+            'created': t - 90,
+            'deleted': t - 60,
+            'entered': None,
+            'assets': [random.choice(self.assets) for i in range(4)],
+            'waitable_events': [],
+            'triggerable_events': [],
+            'map': random.choice(self.maps),
+            'active_times': [t - 90, t - 90, t - 60],
+        })
+        self.rooms['demo-3'] = AttrDict({
+            'created': t - 30,
+            'deleted': t,
+            'entered': None,
+            'assets': [random.choice(self.assets) for i in range(4)],
+            'waitable_events': [],
+            'triggerable_events': [],
+            'map': random.choice(self.maps),
+            'active_times': [t - 30, t - 30, t],
+        })
+        self.room_idx = 0
+
+        self.feedback_history = [
+			(t - 100, 0.2),
+			(t - 90, 0.25),
+			(t - 80, 0.3),
+			(t - 60, 0.25),
+			(t - 50, 0.7),
+			(t - 40, 0.8),
+			(t - 30, 0.6),
+			(t - 20, 0.5),
+			(t - 10, 0.3),
+        ]
         self.gui_signals.loadEnvConfig.emit()
+        self.gui_signals.refreshGraph.emit()
 
     def __enter__(self):
         return self
