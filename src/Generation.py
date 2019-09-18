@@ -10,8 +10,7 @@ class Generation(ConnectionGroup):
 		ConnectionGroup.__init__(self, Configuration.connection.environment)
 		self.env_enums = AttrDict({
 			'QueueTypeGeneration': { 'Terminate': 0, 'Initialize': 1 },
-			'QueueTypeWatcher': { 'Terminate': 0, 'Initialize': 1},
-			'WatcherDataType': { 'Empty': 0 },
+			'QueueTypeWatcher': { 'Terminate': 0, 'Initialize': 1}
 		})
 
 	def _start(self):
