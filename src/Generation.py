@@ -9,17 +9,17 @@ class Generation(ConnectionGroup):
 	def __init__(self):
 		ConnectionGroup.__init__(self, Configuration.connection.environment)
 		self.env_enums = AttrDict({
-			'QueueTypeGeneration': { 'Ping': 0 },
-			'QueueTypeWatcher': { 'Ping': 0 },
+			'QueueTypeGeneration': { 'Terminate': 0, 'Initialize': 1 },
+			'QueueTypeWatcher': { 'Terminate': 0, 'Initialize': 1},
 			'WatcherDataType': { 'Empty': 0 },
 		})
 
 	def _start(self):
-		self.send_env_ping(True)
+		self.send_env_initialize()
 
 	def _stop(self):
 		try:
-			self.send_env_ping(False)
+			self.send_env_terminate()
 		except Exception:
 			pass
 		Configuration.remove_generated()
@@ -48,27 +48,30 @@ class Generation(ConnectionGroup):
 			'idEventToTrigger': idEventToTrigger,
 		})
 
-	def send_env_ping(self, ok=True):
-		msg = 'OK' if ok else 'KO'
-		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Ping, message=msg)
+	def send_env_initialize(self):
+		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Initialize)
+
+	def send_env_terminate(self):
+		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Terminate)
 
 	def handle_env_msg(self, obj):
 		qtype = obj.queueType
 		wtype = obj.watcherType
 		fears = obj.fears
 		msg = obj.message
-		if qtype == self.env_enums.QueueTypeWatcher.Ping:
-			assert wtype == self.env_enums.WatcherDataType.Empty, f'Watchers should not send pings: {obj}'
-			assert msg == 'OK', f'Environment encountered an error: {obj}'
-			return self.handle_env_ping()
+		if qtype == self.env_enums.QueueTypeWatcher.Initialize:
+			return self.handle_env_initialize()
 		raise NotImplementedError(obj)
 
-	def handle_env_ping(self):
+	def handle_env_initialize(self):
 		self.load_env_config()
-		self.send_env_ping()
+		self.start_game()
 
 	def load_env_config(self):
 		Configuration.load_generated()
+
+	def start_game(self):
+		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Start)
 
 	def __enter__(self):
 		return self
