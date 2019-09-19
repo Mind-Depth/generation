@@ -44,7 +44,7 @@ class Generation(ConnectionGroup):
 			'fearIntensity': 0
 		}
 		defaults.update(kw)
-		self.conns[Configuration.connection.environment].write(kw)
+		self.conns[Configuration.connection.environment].write(defaults)
 
 	def send_env_initialize(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Initialize)
@@ -53,7 +53,7 @@ class Generation(ConnectionGroup):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Terminate)
 
 	def send_env_room(self, m, models, events):
-		modelGroupIds = defaultdict(list)
+		modelGroupIds = [[] for i in range(len(self.env_enums.ModelConfigurationType))]
 		for model in models:
 			modelGroupIds[model.type].append(model.id)
 		self.send_env_message(
