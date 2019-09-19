@@ -53,13 +53,13 @@ class Generation(ConnectionGroup):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Terminate)
 
 	def send_env_room(self, m, models, events):
-		modelGroupIds = [[] for i in range(len(self.env_enums.ModelConfigurationType))]
+		model_dict = defaultdict(list)
 		for model in models:
-			modelGroupIds[model.type].append(model.id)
+			model_dict[model.type].append(model.id)
 		self.send_env_message(
 			type = self.env_enums.GenerationMessageType.RoomConfiguration,
 			mapId = m.id,
-			modelGroupIds = modelGroupIds,
+			modelGroupIds = [{'type': key, 'modelIds': value} for key, value in model_dict.items()],
 			eventIds = [event.id for event in events]
 		)
 
