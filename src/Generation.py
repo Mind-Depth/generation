@@ -5,12 +5,15 @@ from collections import defaultdict
 from Connection import ConnectionGroup
 from Configuration import Configuration
 
+# TODO
+# If terminate: tout quitter
+
 class Generation(ConnectionGroup):
 	def __init__(self):
 		ConnectionGroup.__init__(self, Configuration.connection.environment)
 		self.env_enums = AttrDict({
-			'QueueTypeGeneration': { 'Terminate': 0, 'Initialize': 1 },
-			'QueueTypeWatcher': { 'Terminate': 0, 'Initialize': 1}
+			'EnvironmentMessageType': { 'Terminate': 0, 'Initialize': 1 },
+			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
 		})
 
 	def _start(self):
@@ -32,33 +35,24 @@ class Generation(ConnectionGroup):
 			return self.handle_env_msg(obj)
 		raise ValueError(f'"{who}" is not a valid client (its message was: {obj})')
 
-	def send_env_message(self, queueType=0, message='',
-		idsAssets=[], idsEvents=[],
-		idMapAsset=-1, idMapInstance=-1,
-		idEventToTrigger=-1
+	def send_env_message(self, type=0, message='',
+		idsAssets=[], idsEvents=[], idMap=-1,
+		fear=-1, fearIntensity=0
 	):
 		self.conns[Configuration.connection.environment].write({
-			'queueType': queueType,
-			'message': message,
-			'idsAssets': idsAssets,
-			'idsEvents': idsEvents,
-			'idMapAsset': idMapAsset,
-			'idMapInstance': idMapInstance,
-			'idEventToTrigger': idEventToTrigger,
+			'type': type, 'message': message,
+			'idsAssets': idsAssets, 'idsEvents': idsEvents, 'idMap': idMap,
+			'fear': fear, 'fearIntensity': fearIntensity,
 		})
 
 	def send_env_initialize(self):
-		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Initialize)
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Initialize)
 
 	def send_env_terminate(self):
-		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Terminate)
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Terminate)
 
 	def handle_env_msg(self, obj):
-		qtype = obj.queueType
-		wtype = obj.watcherType
-		fears = obj.fears
-		msg = obj.message
-		if qtype == self.env_enums.QueueTypeWatcher.Initialize:
+		if obj.type == self.env_enums.EnvironmentMessageType.Initialize:
 			return self.handle_env_initialize()
 		raise NotImplementedError(obj)
 
@@ -70,7 +64,7 @@ class Generation(ConnectionGroup):
 		Configuration.load_generated()
 
 	def start_game(self):
-		self.send_env_message(queueType=self.env_enums.QueueTypeGeneration.Start)
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
 
 	def __enter__(self):
 		return self
