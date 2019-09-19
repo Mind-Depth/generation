@@ -39,7 +39,7 @@ class Generation(ConnectionGroup):
 			'message': '',
 			'mapId': '',
 			'eventIds': [],
-			'modelGroups': {},
+			'modelGroups': [],
 			'fear': -1,
 			'fearIntensity': 0
 		}
