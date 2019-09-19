@@ -36,12 +36,12 @@ class Generation(ConnectionGroup):
 		raise ValueError(f'"{who}" is not a valid client (its message was: {obj})')
 
 	def send_env_message(self, type=0, message='',
-		idsAssets=[], idsEvents=[], idMap=-1,
+		idsModels=[], idsEvents=[], idMap=-1,
 		fear=-1, fearIntensity=0
 	):
 		self.conns[Configuration.connection.environment].write({
 			'type': type, 'message': message,
-			'idsAssets': idsAssets, 'idsEvents': idsEvents, 'idMap': idMap,
+			'idsModels': idsModels, 'idsEvents': idsEvents, 'idMap': idMap,
 			'fear': fear, 'fearIntensity': fearIntensity,
 		})
 
