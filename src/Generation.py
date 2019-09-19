@@ -1,12 +1,10 @@
 #
 import queue
+import random
 from attrdict import AttrDict
 from collections import defaultdict
 from Connection import ConnectionGroup
 from Configuration import Configuration
-
-# TODO
-# If terminate: tout quitter
 
 class Generation(ConnectionGroup):
 	def __init__(self):
@@ -35,15 +33,18 @@ class Generation(ConnectionGroup):
 			return self.handle_env_msg(obj)
 		raise ValueError(f'"{who}" is not a valid client (its message was: {obj})')
 
-	def send_env_message(self, type=0, message='',
-		idsModels=[], idsEvents=[], idMap=-1,
-		fear=-1, fearIntensity=0
-	):
-		self.conns[Configuration.connection.environment].write({
-			'type': type, 'message': message,
-			'idsModels': idsModels, 'idsEvents': idsEvents, 'idMap': idMap,
-			'fear': fear, 'fearIntensity': fearIntensity,
-		})
+	def send_env_message(self, **kw):
+		defaults = {
+			'type': 0,
+			'message': '',
+			'mapId': '',
+			'eventIds': [],
+			'modelGroupIds': {},
+			'fear': -1,
+			'fearIntensity': 0
+		}
+		defaults.update(kw)
+		self.conns[Configuration.connection.environment].write(kw)
 
 	def send_env_initialize(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Initialize)
@@ -51,17 +52,49 @@ class Generation(ConnectionGroup):
 	def send_env_terminate(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Terminate)
 
+	def send_env_room(self, m, models, events):
+		modelGroupIds = defaultdict(list)
+		for model in models:
+			modelGroupIds[model.type].append(model.id)
+		self.send_env_message(
+			type = self.env_enums.GenerationMessageType.RoomConfiguration,
+			mapId = m.id,
+			modelGroupIds = modelGroupIds,
+			eventIds = [event.id for event in events]
+		)
+
 	def handle_env_msg(self, obj):
+		if obj.type == self.env_enums.EnvironmentMessageType.Terminate:
+			return self.stop()
 		if obj.type == self.env_enums.EnvironmentMessageType.Initialize:
 			return self.handle_env_initialize()
+		if obj.type == self.env_enums.EnvironmentMessageType.RequestRoom:
+			return self.handle_env_request_room()
 		raise NotImplementedError(obj)
 
 	def handle_env_initialize(self):
 		self.load_env_config()
 		self.start_game()
 
+	def handle_env_request_room(self):
+		# TODO base decision on phobias
+		m = random.choice(self.maps)
+		models = [
+				random.choice(self.models[category_config.type])
+				for category_config in m.categories_config
+				for _ in range(random.randint(category_config.use_min, category_config.use_max))
+		]
+		self.send_env_room(m, models, [])
+
 	def load_env_config(self):
 		Configuration.load_generated()
+		for enum, content in Configuration.loaded.enums.items():
+			self.env_enums[enum] = {kv['key']: kv['value'] for kv in content}
+		self.env_enums.update()
+		self.maps = Configuration.loaded.maps
+		self.models = defaultdict(list)
+		for model in Configuration.loaded.models:
+			self.models[model.type].append(model)
 
 	def start_game(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
