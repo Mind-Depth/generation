@@ -39,7 +39,7 @@ class Generation(ConnectionGroup):
 			'message': '',
 			'mapId': '',
 			'eventIds': [],
-			'modelGroupIds': {},
+			'modelGroups': {},
 			'fear': -1,
 			'fearIntensity': 0
 		}
@@ -59,7 +59,7 @@ class Generation(ConnectionGroup):
 		self.send_env_message(
 			type = self.env_enums.GenerationMessageType.RoomConfiguration,
 			mapId = m.id,
-			modelGroupIds = [{'type': key, 'modelIds': value} for key, value in model_dict.items()],
+			modelGroups = [{'type': key, 'modelIds': value} for key, value in model_dict.items()],
 			eventIds = [event.id for event in events]
 		)
 
