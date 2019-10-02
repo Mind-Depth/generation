@@ -1,8 +1,0 @@
-<RCC>
-  <qresource prefix="image">
-    <file>logo.jpg</file>
-  </qresource>
-  <qresource prefix="font">
-    <file>Gorestep.ttf</file>
-  </qresource>
-</RCC>
