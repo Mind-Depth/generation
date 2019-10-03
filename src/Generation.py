@@ -51,6 +51,9 @@ class Generation(ConnectionGroup):
 
 	def start_game(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
+		self.fears = {fear: 0 for fear in self.env_enums.Fears.values()}
+
+	# TODO quit message type
 
 	# ENV SEND
 
@@ -73,7 +76,7 @@ class Generation(ConnectionGroup):
 	def send_env_terminate(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Terminate)
 
-	def send_env_room(self, m, models, events):
+	def send_env_room(self, m, models, events, fear, fearIntensity):
 		model_dict = defaultdict(list)
 		for model in models:
 			model_dict[model.type].append(model.id)
@@ -97,17 +100,35 @@ class Generation(ConnectionGroup):
 
 	def handle_env_initialize(self):
 		self.load_env_config()
+		# TODO unlock start button instead
 		self.start_game()
 
 	def handle_env_request_room(self):
-		# TODO base decision on phobias
+
+		# TODO base decision differently
+		tested = {}
+		untested = {}
+		for fear, value in self.fears.items():
+			(tested if value else untested)[fear] = value
+		fears = list((untested if untested else test).items())
+		fear, value = max(fears, key=lambda kv: kv[1])
+
+		# TODO score each map potential
 		m = random.choice(self.maps)
+
+		# TODO score models
+		filtered_models = {
+			mtype: list(filter(lambda model: fear in model.fears, models))
+			for mtype, models in self.models.items()
+		}
+
+		# TODO try to prevent duplicates
 		models = [
-				random.choice(self.models[category_config.type])
+				random.choice(filtered_models[category_config.type])
 				for category_config in m.categories_config
 				for _ in range(random.randint(category_config.use_min, category_config.use_max))
 		]
-		self.send_env_room(m, models, [])
+		self.send_env_room(m, models, [], fear, value)
 
 	# ENV MISC
 

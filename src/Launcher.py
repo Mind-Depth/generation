@@ -1,6 +1,7 @@
 import UI
 import sys
 import Generation
+import ExceptionHook
 
 class Launcher:
 
@@ -8,18 +9,19 @@ class Launcher:
 		self.app = UI.create_app(sys.argv)
 		self.gen = Generation.create()
 		self.window = None
+		ExceptionHook.add_after(self._error_handler)
 
 	def exec(self):
-		try:
-			return self._run_main()
-		except:
-			raise
-		finally:
-			self._stop()
+		ecode = self._run_main()
+		self._stop()
+		return ecode
 
-	def _replace_window(self, window):
+	def _close_window(self):
 		if self.window is not None:
 			self.window.close()
+
+	def _replace_window(self, window):
+		self._close_window()
 		self.window = window
 		self.window.show()
 
@@ -33,8 +35,13 @@ class Launcher:
 		# TODO launch env & acq
 
 	def _stop(self):
+		self._close_window()
 		self.gen.stop()
 		# TODO close env & acq
+
+	def _error_handler(self, *exception):
+		# TODO better handling
+		self._stop()
 
 if __name__ == '__main__':
 	sys.exit(Launcher().exec())
