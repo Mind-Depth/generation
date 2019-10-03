@@ -11,7 +11,8 @@ class Generation(ConnectionGroup):
 	# CLASS
 
 	def __init__(self):
-		ConnectionGroup.__init__(self, Configuration.connection.environment)#, Configuration.connection.acquisition) TODO
+		ConnectionGroup.__init__(self, Configuration.connection.environment, Configuration.connection.acquisition)
+		self.acq_message_type = AttrDict({key: key for key in {'INIT', 'CONTROL_SESSION', 'PROGRAM_STATE', 'FEAR_EVENT'}})
 		self.env_enums = AttrDict({
 			'EnvironmentMessageType': { 'Terminate': 0, 'Initialize': 1 },
 			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
@@ -27,10 +28,12 @@ class Generation(ConnectionGroup):
 
 	def _start(self):
 		self.send_env_initialize()
+		self.send_acq_initialize()
 
 	def _stop(self):
 		try:
 			self.send_env_terminate()
+			self.send_acq_control_session(False)
 		except Exception:
 			pass
 		Configuration.remove_generated()
@@ -42,9 +45,8 @@ class Generation(ConnectionGroup):
 			return
 		if who == Configuration.connection.environment:
 			return self.handle_env_msg(obj)
-		#TODO
-		#if who == Configuration.connection.acquisition:
-		#	return self.handle_acq_msg(obj)
+		if who == Configuration.connection.acquisition:
+			return self.handle_acq_msg(obj)
 		raise ValueError(f'"{who}" is not a valid client (its message was: {obj})')
 
 	# GEN WORKFLOW
@@ -128,6 +130,8 @@ class Generation(ConnectionGroup):
 				for category_config in m.categories_config
 				for _ in range(random.randint(category_config.use_min, category_config.use_max))
 		]
+
+		self.fear = fear
 		self.send_env_room(m, models, [], fear, value)
 
 	# ENV MISC
@@ -141,6 +145,41 @@ class Generation(ConnectionGroup):
 		self.models = defaultdict(list)
 		for model in Configuration.loaded.models:
 			self.models[model.type].append(model)
+
+	# ACQ SEND
+
+	def send_acq_message(self, **kwargs):
+		self.conns[Configuration.connection.acquisition].write(kwargs)
+
+	def send_acq_initialize(self):
+		self.send_acq_message(message_type=self.acq_message_type.INIT)
+
+	def send_acq_control_session(self, ok):
+		self.send_acq_message(message_type=self.acq_message_type.CONTROL_SESSION, status=ok)
+
+	# ACQ RECV
+
+	def handle_acq_msg(self, obj):
+		'''Redirects messages to the right handler'''
+		if obj.message_type == self.acq_message_type.PROGRAM_STATE:
+			return self.handle_acq_program_state(obj)
+		if mtype == self.acq_message_type.FEAR_EVENT:
+			return self.handler_acq_fear_event(obj)
+		raise NotImplementedError(obj)
+
+	def handle_acq_program_state(self, obj):
+		if obj.status:
+			return self.send_acq_control_session(True)
+		return self.stop()
+
+	def handler_acq_fear_event(self, obj):
+		# TODO real computation
+		value = obj.fear_accuracy / 2
+		if not obj.status_fear:
+			value *= -1
+		value /= 10
+		self.fears[self.fear] = min(max(self.fears[self.fear] + value, 0.0), 1.0)
+		# TODO plot
 
 def create():
 	return Generation()
