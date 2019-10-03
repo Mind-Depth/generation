@@ -27,6 +27,7 @@ class Generation(ConnectionGroup):
 	# CONNECTION GROUP
 
 	def _start(self):
+		self.ready = False
 		self.send_env_initialize()
 		self.send_acq_initialize()
 
@@ -52,8 +53,9 @@ class Generation(ConnectionGroup):
 	# GEN WORKFLOW
 
 	def start_game(self):
-		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
 		self.fears = {fear: 0 for fear in self.env_enums.Fears.values()}
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
+		self.send_acq_control_session(True)
 
 	# TODO quit message type
 
@@ -103,7 +105,9 @@ class Generation(ConnectionGroup):
 	def handle_env_initialize(self):
 		self.load_env_config()
 		# TODO unlock start button instead
-		self.start_game()
+		if self.ready:
+			self.start_game()
+		self.ready = True
 
 	def handle_env_request_room(self):
 
@@ -111,9 +115,12 @@ class Generation(ConnectionGroup):
 		tested = {}
 		untested = {}
 		for fear, value in self.fears.items():
-			(tested if value else untested)[fear] = value
-		fears = list((untested if untested else test).items())
+			(untested if value == -1 else tested)[fear] = value
+		fears = list((untested if untested else tested).items())
 		fear, value = max(fears, key=lambda kv: kv[1])
+		if value == -1:
+			value = 0
+			self.fears[fear] = 0
 
 		# TODO score each map potential
 		m = random.choice(self.maps)
@@ -169,16 +176,19 @@ class Generation(ConnectionGroup):
 
 	def handle_acq_program_state(self, obj):
 		if obj.status:
-			return self.send_acq_control_session(True)
-		return self.stop()
+			# TODO unlock start button instead
+			if self.ready:
+				self.start_game()
+			self.ready = True
+		else:
+			self.stop()
 
 	def handler_acq_fear_event(self, obj):
 		# TODO real computation
-		value = obj.fear_accuracy / 2
-		if not obj.status_fear:
-			value *= -1
-		value /= 10
-		self.fears[self.fear] = min(max(self.fears[self.fear] + value, 0.0), 1.0)
+		# obj.fear_accuracy
+		if obj.status_fear:
+			delta = 0.1
+			self.fears[self.fear] = min(max(self.fears[self.fear] + delta, 0.0), 1.0)
 		# TODO plot
 
 def create():
