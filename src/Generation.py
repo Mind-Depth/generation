@@ -7,12 +7,23 @@ from Connection import ConnectionGroup
 from Configuration import Configuration
 
 class Generation(ConnectionGroup):
+
+	# CLASS
+
 	def __init__(self):
-		ConnectionGroup.__init__(self, Configuration.connection.environment)
+		ConnectionGroup.__init__(self, Configuration.connection.environment)#, Configuration.connection.acquisition) TODO
 		self.env_enums = AttrDict({
 			'EnvironmentMessageType': { 'Terminate': 0, 'Initialize': 1 },
 			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
 		})
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *args):
+		self.stop()
+
+	# CONNECTION GROUP
 
 	def _start(self):
 		self.send_env_initialize()
@@ -31,7 +42,17 @@ class Generation(ConnectionGroup):
 			return
 		if who == Configuration.connection.environment:
 			return self.handle_env_msg(obj)
+		#TODO
+		#if who == Configuration.connection.acquisition:
+		#	return self.handle_acq_msg(obj)
 		raise ValueError(f'"{who}" is not a valid client (its message was: {obj})')
+
+	# GEN WORKFLOW
+
+	def start_game(self):
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
+
+	# ENV SEND
 
 	def send_env_message(self, **kw):
 		defaults = {
@@ -63,6 +84,8 @@ class Generation(ConnectionGroup):
 			eventIds = [event.id for event in events]
 		)
 
+	# ENV RECV
+
 	def handle_env_msg(self, obj):
 		if obj.type == self.env_enums.EnvironmentMessageType.Terminate:
 			return self.stop()
@@ -86,6 +109,8 @@ class Generation(ConnectionGroup):
 		]
 		self.send_env_room(m, models, [])
 
+	# ENV MISC
+
 	def load_env_config(self):
 		Configuration.load_generated()
 		for enum, content in Configuration.loaded.enums.items():
@@ -96,15 +121,5 @@ class Generation(ConnectionGroup):
 		for model in Configuration.loaded.models:
 			self.models[model.type].append(model)
 
-	def start_game(self):
-		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
-
-	def __enter__(self):
-		return self
-
-	def __exit__(self, *args):
-		self.stop()
-
-if __name__ == '__main__':
-    with Generation() as gen:
-        gen.start()
+def create():
+	return Generation()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\EIP\generation_qt\main.ui'
+# Form implementation generated from reading ui file 'D:\EIP\generation_qt\launcher.ui'
 #
 # Created by: PyQt5 UI code generator 5.13.1
 #
@@ -45,7 +45,7 @@ class Ui_MainWindow(object):
         self.Logo.setIndent(0)
         self.Logo.setObjectName("Logo")
         self.Start = QtWidgets.QPushButton(self.MainWidget)
-        self.Start.setGeometry(QtCore.QRect(475, 400, 250, 90))
+        self.Start.setGeometry(QtCore.QRect(475, 500, 250, 90))
         self.Start.setStyleSheet("QPushButton {\n"
 "    background-color: rgba(0, 0, 0, 0);\n"
 "    border-style: solid;\n"
@@ -64,6 +64,26 @@ class Ui_MainWindow(object):
 "}\n"
 "")
         self.Start.setObjectName("Start")
+        self.Quit = QtWidgets.QPushButton(self.MainWidget)
+        self.Quit.setGeometry(QtCore.QRect(475, 700, 250, 90))
+        self.Quit.setStyleSheet("QPushButton {\n"
+"    background-color: rgba(0, 0, 0, 0);\n"
+"    border-style: solid;\n"
+"    color:white;\n"
+"    border-color:rgba(0, 0, 0, 0);\n"
+"    border-width: 2px;\n"
+"    border-top:0px;\n"
+"    border-left:0px;\n"
+"    border-right:0px;\n"
+"    font-family:gorestep;\n"
+"    font-size:72px;\n"
+"}\n"
+"\n"
+"QPushButton:hover {\n"
+"    border-color: #94191c;\n"
+"}\n"
+"")
+        self.Quit.setObjectName("Quit")
         MainWindow.setCentralWidget(self.MainWidget)
 
         self.retranslateUi(MainWindow)
@@ -72,5 +92,6 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mind Depths"))
-        self.Start.setText(_translate("MainWindow", "START"))
+        self.Start.setText(_translate("MainWindow", "Start"))
+        self.Quit.setText(_translate("MainWindow", "Quit"))
 import resource_rc
