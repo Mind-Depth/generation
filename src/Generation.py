@@ -17,6 +17,9 @@ class Generation(ConnectionGroup):
 			'EnvironmentMessageType': { 'Terminate': 0, 'Initialize': 1 },
 			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
 		})
+		self.reverse_env_enums = AttrDict()
+		# TODO rm
+		self.fears = {}
 
 	def __enter__(self):
 		return self
@@ -43,6 +46,12 @@ class Generation(ConnectionGroup):
 		try:
 			who, obj = self.q.get(block=True, timeout=1)
 		except queue.Empty:
+			# TODO real callback
+			if self.fears:
+				if self.afraid:
+					value = min(max(self.fears[self.fear] + 0.05, 0.0), 1.0)
+					self.fears[self.fear] = value
+					print(self.reverse_env_enums.Fears[self.fear] + ': ' + str(value))
 			return
 		if who == Configuration.connection.environment:
 			return self.handle_env_msg(obj)
@@ -56,6 +65,7 @@ class Generation(ConnectionGroup):
 		self.fears = {fear: 0 for fear in self.env_enums.Fears.values()}
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
 		self.send_acq_control_session(True)
+		self.afraid = False
 
 	# TODO quit message type
 
@@ -146,7 +156,9 @@ class Generation(ConnectionGroup):
 	def load_env_config(self):
 		Configuration.load_generated()
 		for enum, content in Configuration.loaded.enums.items():
-			self.env_enums[enum] = {kv['key']: kv['value'] for kv in content}
+			kvs = [(kv['key'], kv['value']) for kv in content]
+			self.env_enums[enum] = {kv[0]: kv[1] for kv in kvs}
+			self.reverse_env_enums[enum] = {kv[1]: kv[0] for kv in kvs}
 		self.env_enums.update()
 		self.maps = Configuration.loaded.maps
 		self.models = defaultdict(list)
@@ -170,7 +182,7 @@ class Generation(ConnectionGroup):
 		'''Redirects messages to the right handler'''
 		if obj.message_type == self.acq_message_type.PROGRAM_STATE:
 			return self.handle_acq_program_state(obj)
-		if mtype == self.acq_message_type.FEAR_EVENT:
+		if obj.message_type == self.acq_message_type.FEAR_EVENT:
 			return self.handler_acq_fear_event(obj)
 		raise NotImplementedError(obj)
 
@@ -186,9 +198,7 @@ class Generation(ConnectionGroup):
 	def handler_acq_fear_event(self, obj):
 		# TODO real computation
 		# obj.fear_accuracy
-		if obj.status_fear:
-			delta = 0.1
-			self.fears[self.fear] = min(max(self.fears[self.fear] + delta, 0.0), 1.0)
+		self.afraid = obj.status_fear
 		# TODO plot
 
 def create():
