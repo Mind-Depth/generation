@@ -12,7 +12,9 @@ class Launcher:
 		ExceptionHook.add_after(self._error_handler)
 
 	def exec(self):
-		ecode = self._run_main()
+		self._replace_window(UI.StatusWindow())
+		self.gen.start(thread=True)
+		ecode = self.app()
 		self._stop()
 		return ecode
 
@@ -24,15 +26,6 @@ class Launcher:
 		self._close_window()
 		self.window = window
 		self.window.show()
-
-	def _run_main(self):
-		self._replace_window(UI.LauncherWindow(start=self._run_secondary))
-		self.gen.start(thread=True)
-		return self.app()
-
-	def _run_secondary(self):
-		self._replace_window(UI.StatusWindow())
-		# TODO launch env & acq
 
 	def _stop(self):
 		self._close_window()
