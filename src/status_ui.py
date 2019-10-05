@@ -66,9 +66,9 @@ class Ui_MainWindow(object):
         self.FrameTop.setLineWidth(2)
         self.FrameTop.setMidLineWidth(2)
         self.FrameTop.setObjectName("FrameTop")
-        self.Play = QtWidgets.QPushButton(self.MainWidget)
-        self.Play.setGeometry(QtCore.QRect(510, 20, 75, 75))
-        self.Play.setStyleSheet("QPushButton\n"
+        self.Start = QtWidgets.QPushButton(self.MainWidget)
+        self.Start.setGeometry(QtCore.QRect(510, 20, 75, 75))
+        self.Start.setStyleSheet("QPushButton\n"
 "{\n"
 "   background-color:#ffffff;\n"
 "}\n"
@@ -77,12 +77,12 @@ class Ui_MainWindow(object):
 "{\n"
 "   background-color:#bbbbbb;\n"
 "}")
-        self.Play.setText("")
+        self.Start.setText("")
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap(":/image/play.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.Play.setIcon(icon1)
-        self.Play.setIconSize(QtCore.QSize(150, 150))
-        self.Play.setObjectName("Play")
+        self.Start.setIcon(icon1)
+        self.Start.setIconSize(QtCore.QSize(150, 150))
+        self.Start.setObjectName("Start")
         self.FrameBottom = QtWidgets.QFrame(self.MainWidget)
         self.FrameBottom.setGeometry(QtCore.QRect(5, 605, 1190, 290))
         self.FrameBottom.setStyleSheet("background-color: #111111;")
@@ -117,7 +117,7 @@ class Ui_MainWindow(object):
         self.Logo.raise_()
         self.Stop.raise_()
         self.verticalLayoutWidget.raise_()
-        self.Play.raise_()
+        self.Start.raise_()
         self.FrameRight.raise_()
         self.FrameLeft.raise_()
         self.test.raise_()

@@ -5,14 +5,14 @@ import ExceptionHook
 
 class Launcher:
 
-	def __init__(self):
+	def __init__(self, *a, **kw):
 		self.app = UI.create_app(sys.argv)
-		self.gen = Generation.create()
+		self.gen = Generation.Generation(*a, **kw)
 		self.window = None
 		ExceptionHook.add_after(self._error_handler)
 
 	def exec(self):
-		self._replace_window(UI.StatusWindow())
+		self._replace_window(UI.StatusWindow(self.gen.start_game, self.gen.stop_game))
 		self.gen.start(thread=True)
 		ecode = self.app()
 		self._stop()
@@ -37,4 +37,4 @@ class Launcher:
 		self._stop()
 
 if __name__ == '__main__':
-	sys.exit(Launcher().exec())
+	sys.exit(Launcher(use_acq = '--no-acq' not in sys.argv, use_env = '--no-env' not in sys.argv).exec())

@@ -10,16 +10,23 @@ class Generation(ConnectionGroup):
 
 	# CLASS
 
-	def __init__(self):
-		ConnectionGroup.__init__(self, Configuration.connection.environment, Configuration.connection.acquisition)
+	def __init__(self, use_acq=True, use_env=True):
+		self.use_acq = use_acq
+		self.use_env = use_env
+		self.clients = []
+		if self.use_acq:
+			self.clients.append(Configuration.connection.acquisition)
+		if self.use_env:
+			self.clients.append(Configuration.connection.environment)
+		self.disconnected_clients = len(self.clients)
 		self.acq_message_type = AttrDict({key: key for key in {'INIT', 'CONTROL_SESSION', 'PROGRAM_STATE', 'FEAR_EVENT'}})
 		self.env_enums = AttrDict({
 			'EnvironmentMessageType': { 'Terminate': 0, 'Initialize': 1 },
 			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
 		})
 		self.reverse_env_enums = AttrDict()
-		# TODO rm
-		self.fears = {}
+		self.reset()
+		super().__init__(*self.clients)
 
 	def __enter__(self):
 		return self
@@ -30,44 +37,70 @@ class Generation(ConnectionGroup):
 	# CONNECTION GROUP
 
 	def _start(self):
-		self.ready = False
-		self.send_env_initialize()
-		self.send_acq_initialize()
+		if self.use_acq:
+			self.send_acq_initialize()
+		if self.use_env:
+			self.send_env_initialize()
 
 	def _stop(self):
-		try:
-			self.send_env_terminate()
-			self.send_acq_control_session(False)
-		except Exception:
-			pass
+		for condition, callback, *args in (
+			(self.use_acq, self.send_acq_control_session, False),
+			(self.use_env, self.send_env_terminate),
+		):
+			if condition:
+				try:
+					callback(*args)
+				except Exception:
+					pass
 		Configuration.remove_generated()
 
 	def _update(self):
 		try:
 			who, obj = self.q.get(block=True, timeout=1)
 		except queue.Empty:
-			# TODO real callback
-			if self.fears:
-				if self.afraid:
-					value = min(max(self.fears[self.fear] + 0.05, 0.0), 1.0)
-					self.fears[self.fear] = value
-					print(self.reverse_env_enums.Fears[self.fear] + ': ' + str(value))
-			return
-		if who == Configuration.connection.environment:
-			return self.handle_env_msg(obj)
-		if who == Configuration.connection.acquisition:
-			return self.handle_acq_msg(obj)
-		raise ValueError(f'"{who}" is not a valid client (its message was: {obj})')
+			pass
+		else:
+			if who == Configuration.connection.environment:
+				self.handle_env_msg(obj)
+			elif who == Configuration.connection.acquisition:
+				self.handle_acq_msg(obj)
+		self.handle_background_tasks()
 
 	# GEN WORKFLOW
 
-	def start_game(self):
-		self.fears = {fear: 0 for fear in self.env_enums.Fears.values()}
-		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
-		self.send_acq_control_session(True)
+	def reset(self):
+		self.fears = {}
 		self.afraid = False
+		self.fear = None
 
-	# TODO quit message type
+	def start_game(self):
+		# TODO grey out buttons
+		if self.use_acq:
+			self.send_acq_control_session(True)
+		if self.use_env:
+			self.fears = {fear: 0 for fear in self.env_enums.Fears.values()}
+			self.send_env_start()
+
+	def stop_game(self):
+		# TODO grey out buttons
+		# TODO send to ACQ
+		if self.use_env:
+			self.send_env_quit()
+		self.reset()
+
+	def handle_background_tasks(self):
+
+		# Start game
+		if not self.disconnected_clients:
+			# TODO activate button
+			self.disconnected_clients -= 1
+
+		# Update fear level
+		if self.afraid and self.fear:
+			# TODO real computation
+			value = min(max(self.fears[self.fear] + 0.05, 0.0), 1.0)
+			self.fears[self.fear] = value
+			print(self.reverse_env_enums.Fears[self.fear] + ': ' + str(value))
 
 	# ENV SEND
 
@@ -89,6 +122,12 @@ class Generation(ConnectionGroup):
 
 	def send_env_terminate(self):
 		self.send_env_message(type=self.env_enums.GenerationMessageType.Terminate)
+
+	def send_env_start(self):
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Start)
+
+	def send_env_quit(self):
+		self.send_env_message(type=self.env_enums.GenerationMessageType.Quit)
 
 	def send_env_room(self, m, models, events, fear, fearIntensity):
 		model_dict = defaultdict(list)
@@ -114,10 +153,7 @@ class Generation(ConnectionGroup):
 
 	def handle_env_initialize(self):
 		self.load_env_config()
-		# TODO unlock start button instead
-		if self.ready:
-			self.start_game()
-		self.ready = True
+		self.disconnected_clients -= 1
 
 	def handle_env_request_room(self):
 
@@ -188,10 +224,7 @@ class Generation(ConnectionGroup):
 
 	def handle_acq_program_state(self, obj):
 		if obj.status:
-			# TODO unlock start button instead
-			if self.ready:
-				self.start_game()
-			self.ready = True
+			self.disconnected_clients -= 1
 		else:
 			self.stop()
 
@@ -200,6 +233,3 @@ class Generation(ConnectionGroup):
 		# obj.fear_accuracy
 		self.afraid = obj.status_fear
 		# TODO plot
-
-def create():
-	return Generation()

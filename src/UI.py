@@ -10,10 +10,14 @@ class TimeAxis(pyqtgraph.AxisItem):
 
 class StatusWindow(QtWidgets.QMainWindow):
 
-	def __init__(self):
+	def __init__(self, start_callback, stop_callback):
 		super().__init__()
 		status_ui.Ui_MainWindow().setupUi(self)
 		self.setFixedSize(self.size())
+
+		# Callbacks
+		self.findChild(QtWidgets.QPushButton, 'Start').clicked.connect(start_callback)
+		self.findChild(QtWidgets.QPushButton, 'Stop').clicked.connect(stop_callback)
 
 		# ColorMap
 		colors = [(0, 255, 0), (255, 255, 0), (255, 0, 0)]
