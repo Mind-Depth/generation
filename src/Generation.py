@@ -137,7 +137,9 @@ class Generation(ConnectionGroup):
 			type = self.env_enums.GenerationMessageType.RoomConfiguration,
 			mapId = m.id,
 			modelGroups = [{'type': key, 'modelIds': value} for key, value in model_dict.items()],
-			eventIds = [event.id for event in events]
+			eventIds = [event.id for event in events],
+			fear = fear,
+			fearIntensity = fearIntensity,
 		)
 
 	# ENV RECV
@@ -164,9 +166,6 @@ class Generation(ConnectionGroup):
 			(untested if value == -1 else tested)[fear] = value
 		fears = list((untested if untested else tested).items())
 		fear, value = max(fears, key=lambda kv: kv[1])
-		if value == -1:
-			value = 0
-			self.fears[fear] = 0
 
 		# TODO score each map potential
 		m = random.choice(self.maps)
