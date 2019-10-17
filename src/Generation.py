@@ -1,4 +1,5 @@
 #
+import time
 import queue
 import random
 from attrdict import AttrDict
@@ -25,6 +26,7 @@ class Generation(ConnectionGroup):
 			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
 		})
 		self.reverse_env_enums = AttrDict()
+		self.ui = None # TODO clean
 		self.reset()
 		super().__init__(*self.clients)
 
@@ -36,7 +38,9 @@ class Generation(ConnectionGroup):
 
 	# CONNECTION GROUP
 
-	def _start(self):
+	def _start(self, ui):
+		# TODO clean
+		self.ui = ui
 		if self.use_acq:
 			self.send_acq_initialize()
 		if self.use_env:
@@ -78,7 +82,7 @@ class Generation(ConnectionGroup):
 		if self.use_acq:
 			self.send_acq_control_session(True)
 		if self.use_env:
-			self.fears = {fear: 0 for fear in self.env_enums.Fears.values()}
+			self.fears = {fear: -1 for fear in self.env_enums.Fears.values()} # TODO not use -1 ?
 			self.send_env_start()
 
 	def stop_game(self):
@@ -96,11 +100,15 @@ class Generation(ConnectionGroup):
 			self.disconnected_clients -= 1
 
 		# Update fear level
-		if self.afraid and self.fear:
+		if self.afraid and self.fear is not None:
 			# TODO real computation
 			value = min(max(self.fears[self.fear] + 0.05, 0.0), 1.0)
 			self.fears[self.fear] = value
 			print(self.reverse_env_enums.Fears[self.fear] + ': ' + str(value))
+
+		# TODO Clean and compute for real
+		if self.ui:
+			self.ui.plotXY(time.time(), int(self.afraid))
 
 	# ENV SEND
 
@@ -178,12 +186,16 @@ class Generation(ConnectionGroup):
 
 		# TODO try to prevent duplicates
 		models = [
-				random.choice(filtered_models[category_config.type])
+				random.choice(filtered_models[category_config.type] or self.models[category_config.type]) # TODO handle empty list in another way
 				for category_config in m.categories_config
 				for _ in range(random.randint(category_config.use_min, category_config.use_max))
 		]
 
+		# TODO clean
+		self.fears[fear] *= self.fears[fear] > 0
 		self.fear = fear
+		# TODO clean
+		self.ui.plotText(time.time(), self.reverse_env_enums.Fears[self.fear])
 		self.send_env_room(m, models, [], fear, value)
 
 	# ENV MISC
@@ -230,5 +242,7 @@ class Generation(ConnectionGroup):
 	def handler_acq_fear_event(self, obj):
 		# TODO real computation
 		# obj.fear_accuracy
+		# obj.status_fear
+		# obj.timestamp # TODO handle older timestamp
 		self.afraid = obj.status_fear
 		# TODO plot

@@ -13,7 +13,7 @@ class Launcher:
 
 	def exec(self):
 		self._replace_window(UI.StatusWindow(self.gen.start_game, self.gen.stop_game))
-		self.gen.start(thread=True)
+		self.gen.start(thread=True, ui=self.window) # TODO clean
 		ecode = self.app()
 		self._stop()
 		return ecode
