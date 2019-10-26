@@ -192,7 +192,8 @@ class Generation(ConnectionGroup):
 		]
 
 		# TODO clean
-		self.fears[fear] *= self.fears[fear] > 0
+		value *= value > 0
+		self.fears[fear] = value
 		self.fear = fear
 		# TODO clean
 		self.ui.plotText(time.time(), self.reverse_env_enums.Fears[self.fear])
