@@ -150,6 +150,12 @@ class Generation(ConnectionGroup):
 			fearIntensity = fearIntensity,
 		)
 
+	def send_env_fearlevel(self, fearIntensity):
+		self.send_env_message(
+			type=self.env_enums.GenerationMessageType.FearLevel,
+			fearIntensity=fearIntensity
+		)
+
 	# ENV RECV
 
 	def handle_env_msg(self, obj):
@@ -247,3 +253,6 @@ class Generation(ConnectionGroup):
 		# obj.timestamp # TODO handle older timestamp
 		self.afraid = obj.status_fear
 		# TODO plot
+
+		# TODO Send a value based on obj.fear_accuracy
+		self.send_env_fearlevel(1.0 if obj.status_fear else 0.0)
