@@ -107,9 +107,9 @@ class Ui_MainWindow(object):
         self.FrameLeft.setLineWidth(2)
         self.FrameLeft.setMidLineWidth(2)
         self.FrameLeft.setObjectName("FrameLeft")
-        self.progressBar = QtWidgets.QProgressBar(self.FrameLeft)
-        self.progressBar.setGeometry(QtCore.QRect(190, 60, 500, 30))
-        self.progressBar.setStyleSheet("QProgressBar:horizontal {\n"
+        self.Achluophobia = QtWidgets.QProgressBar(self.FrameLeft)
+        self.Achluophobia.setGeometry(QtCore.QRect(190, 60, 500, 30))
+        self.Achluophobia.setStyleSheet("QProgressBar:horizontal {\n"
 "border: 1px solid gray;\n"
 "border-radius: 3px;\n"
 "background: black;\n"
@@ -118,120 +118,120 @@ class Ui_MainWindow(object):
 "background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
 "width: 10px;\n"
 "}")
-        self.progressBar.setMaximum(100)
-        self.progressBar.setProperty("value", 20)
-        self.progressBar.setTextVisible(False)
-        self.progressBar.setOrientation(QtCore.Qt.Horizontal)
-        self.progressBar.setInvertedAppearance(False)
-        self.progressBar.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.progressBar.setObjectName("progressBar")
-        self.Arachnophobia = QtWidgets.QLabel(self.FrameLeft)
-        self.Arachnophobia.setGeometry(QtCore.QRect(20, 160, 150, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.Arachnophobia.setFont(font)
-        self.Arachnophobia.setStyleSheet("QLabel {\n"
-"color: #bbbbbb;\n"
-"}")
-        self.Arachnophobia.setAlignment(QtCore.Qt.AlignCenter)
-        self.Arachnophobia.setObjectName("Arachnophobia")
-        self.progressBar_2 = QtWidgets.QProgressBar(self.FrameLeft)
-        self.progressBar_2.setGeometry(QtCore.QRect(190, 260, 500, 30))
-        self.progressBar_2.setStyleSheet("QProgressBar:horizontal {\n"
-"border: 1px solid gray;\n"
-"border-radius: 3px;\n"
-"background: black;\n"
-"}\n"
-"QProgressBar::chunk:horizontal {\n"
-"background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
-"width: 10px;\n"
-"}")
-        self.progressBar_2.setMaximum(100)
-        self.progressBar_2.setProperty("value", 75)
-        self.progressBar_2.setTextVisible(False)
-        self.progressBar_2.setOrientation(QtCore.Qt.Horizontal)
-        self.progressBar_2.setInvertedAppearance(False)
-        self.progressBar_2.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.progressBar_2.setObjectName("progressBar_2")
-        self.progressBar_3 = QtWidgets.QProgressBar(self.FrameLeft)
-        self.progressBar_3.setGeometry(QtCore.QRect(190, 160, 500, 30))
-        self.progressBar_3.setStyleSheet("QProgressBar:horizontal {\n"
-"border: 1px solid gray;\n"
-"border-radius: 3px;\n"
-"background: black;\n"
-"}\n"
-"QProgressBar::chunk:horizontal {\n"
-"background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
-"width: 10px;\n"
-"}")
-        self.progressBar_3.setMaximum(100)
-        self.progressBar_3.setProperty("value", 0)
-        self.progressBar_3.setTextVisible(False)
-        self.progressBar_3.setOrientation(QtCore.Qt.Horizontal)
-        self.progressBar_3.setInvertedAppearance(False)
-        self.progressBar_3.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.progressBar_3.setObjectName("progressBar_3")
-        self.progressBar_4 = QtWidgets.QProgressBar(self.FrameLeft)
-        self.progressBar_4.setGeometry(QtCore.QRect(190, 360, 500, 30))
-        self.progressBar_4.setStyleSheet("QProgressBar:horizontal {\n"
-"border: 1px solid gray;\n"
-"border-radius: 3px;\n"
-"background: black;\n"
-"}\n"
-"QProgressBar::chunk:horizontal {\n"
-"background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
-"width: 10px;\n"
-"}")
-        self.progressBar_4.setMaximum(100)
-        self.progressBar_4.setProperty("value", 65)
-        self.progressBar_4.setTextVisible(False)
-        self.progressBar_4.setOrientation(QtCore.Qt.Horizontal)
-        self.progressBar_4.setInvertedAppearance(False)
-        self.progressBar_4.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.progressBar_4.setObjectName("progressBar_4")
-        self.Claustrophobia = QtWidgets.QLabel(self.FrameLeft)
-        self.Claustrophobia.setGeometry(QtCore.QRect(20, 260, 150, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.Claustrophobia.setFont(font)
-        self.Claustrophobia.setStyleSheet("QLabel {\n"
-"color: #bbbbbb;\n"
-"}")
-        self.Claustrophobia.setAlignment(QtCore.Qt.AlignCenter)
-        self.Claustrophobia.setObjectName("Claustrophobia")
-        self.Vertigo = QtWidgets.QLabel(self.FrameLeft)
-        self.Vertigo.setGeometry(QtCore.QRect(20, 360, 150, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.Vertigo.setFont(font)
-        self.Vertigo.setStyleSheet("QLabel {\n"
-"color: #bbbbbb;\n"
-"}")
-        self.Vertigo.setAlignment(QtCore.Qt.AlignCenter)
-        self.Vertigo.setObjectName("Vertigo")
-        self.Achluophobia = QtWidgets.QLabel(self.FrameLeft)
-        self.Achluophobia.setGeometry(QtCore.QRect(20, 60, 150, 30))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setBold(True)
-        font.setWeight(75)
-        self.Achluophobia.setFont(font)
-        self.Achluophobia.setStyleSheet("QLabel {\n"
-"color: #bbbbbb;\n"
-"}")
-        self.Achluophobia.setAlignment(QtCore.Qt.AlignCenter)
+        self.Achluophobia.setMaximum(100)
+        self.Achluophobia.setProperty("value", 0)
+        self.Achluophobia.setTextVisible(False)
+        self.Achluophobia.setOrientation(QtCore.Qt.Horizontal)
+        self.Achluophobia.setInvertedAppearance(False)
+        self.Achluophobia.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
         self.Achluophobia.setObjectName("Achluophobia")
-        self.test = QtWidgets.QLabel(self.MainWidget)
-        self.test.setGeometry(QtCore.QRect(745, 145, 445, 445))
-        self.test.setText("")
-        self.test.setPixmap(QtGui.QPixmap(":/image/TMP-placeholder.jpg"))
-        self.test.setObjectName("test")
+        self.Arachnophobia_ = QtWidgets.QLabel(self.FrameLeft)
+        self.Arachnophobia_.setGeometry(QtCore.QRect(20, 160, 150, 30))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.Arachnophobia_.setFont(font)
+        self.Arachnophobia_.setStyleSheet("QLabel {\n"
+"color: #bbbbbb;\n"
+"}")
+        self.Arachnophobia_.setAlignment(QtCore.Qt.AlignCenter)
+        self.Arachnophobia_.setObjectName("Arachnophobia_")
+        self.Claustrophobia = QtWidgets.QProgressBar(self.FrameLeft)
+        self.Claustrophobia.setGeometry(QtCore.QRect(190, 260, 500, 30))
+        self.Claustrophobia.setStyleSheet("QProgressBar:horizontal {\n"
+"border: 1px solid gray;\n"
+"border-radius: 3px;\n"
+"background: black;\n"
+"}\n"
+"QProgressBar::chunk:horizontal {\n"
+"background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
+"width: 10px;\n"
+"}")
+        self.Claustrophobia.setMaximum(100)
+        self.Claustrophobia.setProperty("value", 0)
+        self.Claustrophobia.setTextVisible(False)
+        self.Claustrophobia.setOrientation(QtCore.Qt.Horizontal)
+        self.Claustrophobia.setInvertedAppearance(False)
+        self.Claustrophobia.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.Claustrophobia.setObjectName("Claustrophobia")
+        self.Arachnophobia = QtWidgets.QProgressBar(self.FrameLeft)
+        self.Arachnophobia.setGeometry(QtCore.QRect(190, 160, 500, 30))
+        self.Arachnophobia.setStyleSheet("QProgressBar:horizontal {\n"
+"border: 1px solid gray;\n"
+"border-radius: 3px;\n"
+"background: black;\n"
+"}\n"
+"QProgressBar::chunk:horizontal {\n"
+"background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
+"width: 10px;\n"
+"}")
+        self.Arachnophobia.setMaximum(100)
+        self.Arachnophobia.setProperty("value", 0)
+        self.Arachnophobia.setTextVisible(False)
+        self.Arachnophobia.setOrientation(QtCore.Qt.Horizontal)
+        self.Arachnophobia.setInvertedAppearance(False)
+        self.Arachnophobia.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.Arachnophobia.setObjectName("Arachnophobia")
+        self.Vertigo = QtWidgets.QProgressBar(self.FrameLeft)
+        self.Vertigo.setGeometry(QtCore.QRect(190, 360, 500, 30))
+        self.Vertigo.setStyleSheet("QProgressBar:horizontal {\n"
+"border: 1px solid gray;\n"
+"border-radius: 3px;\n"
+"background: black;\n"
+"}\n"
+"QProgressBar::chunk:horizontal {\n"
+"background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
+"width: 10px;\n"
+"}")
+        self.Vertigo.setMaximum(100)
+        self.Vertigo.setProperty("value", 0)
+        self.Vertigo.setTextVisible(False)
+        self.Vertigo.setOrientation(QtCore.Qt.Horizontal)
+        self.Vertigo.setInvertedAppearance(False)
+        self.Vertigo.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.Vertigo.setObjectName("Vertigo")
+        self.Claustrophobia_ = QtWidgets.QLabel(self.FrameLeft)
+        self.Claustrophobia_.setGeometry(QtCore.QRect(20, 260, 150, 30))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.Claustrophobia_.setFont(font)
+        self.Claustrophobia_.setStyleSheet("QLabel {\n"
+"color: #bbbbbb;\n"
+"}")
+        self.Claustrophobia_.setAlignment(QtCore.Qt.AlignCenter)
+        self.Claustrophobia_.setObjectName("Claustrophobia_")
+        self.Vertigo_ = QtWidgets.QLabel(self.FrameLeft)
+        self.Vertigo_.setGeometry(QtCore.QRect(20, 360, 150, 30))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.Vertigo_.setFont(font)
+        self.Vertigo_.setStyleSheet("QLabel {\n"
+"color: #bbbbbb;\n"
+"}")
+        self.Vertigo_.setAlignment(QtCore.Qt.AlignCenter)
+        self.Vertigo_.setObjectName("Vertigo_")
+        self.Achluophobia_ = QtWidgets.QLabel(self.FrameLeft)
+        self.Achluophobia_.setGeometry(QtCore.QRect(20, 60, 150, 30))
+        font = QtGui.QFont()
+        font.setPointSize(12)
+        font.setBold(True)
+        font.setWeight(75)
+        self.Achluophobia_.setFont(font)
+        self.Achluophobia_.setStyleSheet("QLabel {\n"
+"color: #bbbbbb;\n"
+"}")
+        self.Achluophobia_.setAlignment(QtCore.Qt.AlignCenter)
+        self.Achluophobia_.setObjectName("Achluophobia_")
+        self.Preview = QtWidgets.QLabel(self.MainWidget)
+        self.Preview.setGeometry(QtCore.QRect(745, 145, 445, 445))
+        self.Preview.setText("")
+        self.Preview.setAlignment(QtCore.Qt.AlignCenter)
+        self.Preview.setObjectName("Preview")
         self.FrameBottom.raise_()
         self.FrameTop.raise_()
         self.Logo.raise_()
@@ -240,7 +240,7 @@ class Ui_MainWindow(object):
         self.Start.raise_()
         self.FrameRight.raise_()
         self.FrameLeft.raise_()
-        self.test.raise_()
+        self.Preview.raise_()
         MainWindow.setCentralWidget(self.MainWidget)
 
         self.retranslateUi(MainWindow)
@@ -249,12 +249,12 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mind Depths"))
-        self.progressBar.setFormat(_translate("MainWindow", "%p%"))
-        self.Arachnophobia.setText(_translate("MainWindow", "Arachnophobia"))
-        self.progressBar_2.setFormat(_translate("MainWindow", "%p%"))
-        self.progressBar_3.setFormat(_translate("MainWindow", "%p%"))
-        self.progressBar_4.setFormat(_translate("MainWindow", "%p%"))
-        self.Claustrophobia.setText(_translate("MainWindow", "Claustrophobia"))
-        self.Vertigo.setText(_translate("MainWindow", "Vertigo"))
-        self.Achluophobia.setText(_translate("MainWindow", "Achluophobia"))
+        self.Achluophobia.setFormat(_translate("MainWindow", "%p%"))
+        self.Arachnophobia_.setText(_translate("MainWindow", "Arachnophobia"))
+        self.Claustrophobia.setFormat(_translate("MainWindow", "%p%"))
+        self.Arachnophobia.setFormat(_translate("MainWindow", "%p%"))
+        self.Vertigo.setFormat(_translate("MainWindow", "%p%"))
+        self.Claustrophobia_.setText(_translate("MainWindow", "Claustrophobia"))
+        self.Vertigo_.setText(_translate("MainWindow", "Vertigo"))
+        self.Achluophobia_.setText(_translate("MainWindow", "Achluophobia"))
 import resource_rc

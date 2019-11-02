@@ -82,10 +82,11 @@ class Generation(ConnectionGroup):
 		if self.use_acq:
 			self.send_acq_control_session(True)
 		if self.use_env:
-			self.fears = {fear: -1 for fear in self.env_enums.Fears.values()} # TODO not use -1 ?
+			self.fears = {fear: -1 for fear in self.env_enums.Fears.values()}
 			self.send_env_start()
 
 	def stop_game(self):
+		# TODO Reset UI
 		# TODO grey out buttons
 		# TODO send to ACQ
 		if self.use_env:
@@ -104,7 +105,8 @@ class Generation(ConnectionGroup):
 			# TODO real computation
 			value = min(max(self.fears[self.fear] + 0.05, 0.0), 1.0)
 			self.fears[self.fear] = value
-			print(self.reverse_env_enums.Fears[self.fear] + ': ' + str(value))
+			if self.ui:
+				self.ui.updateFear(self.reverse_env_enums.Fears[self.fear], value)
 
 		# TODO Clean and compute for real
 		if self.ui:
