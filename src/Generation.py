@@ -25,6 +25,7 @@ class Generation(ConnectionGroup):
 			'EnvironmentMessageType': { 'Terminate': 0, 'Initialize': 1 },
 			'GenerationMessageType': { 'Terminate': 0, 'Initialize': 1}
 		})
+		Configuration.remove_generated()
 		self.reverse_env_enums = AttrDict()
 		self.ui = None # TODO clean
 		self.reset()
