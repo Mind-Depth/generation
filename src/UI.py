@@ -102,6 +102,9 @@ class StatusWindow(QtWidgets.QMainWindow):
 		for item in self.plot_text_items:
 			self.plot.addItem(item)
 
+def quit_app():
+	QtWidgets.QApplication.quit()
+
 def create_app(*args, **kwargs):
 	app = QtWidgets.QApplication(*args, **kwargs)
 	QtGui.QFontDatabase.addApplicationFont(':font/gorestep.ttf')

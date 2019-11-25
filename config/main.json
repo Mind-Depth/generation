@@ -12,5 +12,5 @@
         "environment": "MDEnvironment",
         "acquisition": "MDAcquisition"
     },
-    "log": "..\\log.txt"
+    "log": "..\\Logs\\generation.txt"
 }

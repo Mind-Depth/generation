@@ -2,6 +2,7 @@
 import time
 import queue
 import random
+from UI import quit_app
 from attrdict import AttrDict
 from collections import defaultdict
 from Connection import ConnectionGroup
@@ -48,16 +49,14 @@ class Generation(ConnectionGroup):
 			self.send_env_initialize()
 
 	def _stop(self):
-		for condition, callback, *args in (
-			(self.use_acq, self.send_acq_control_session, False),
-			(self.use_env, self.send_env_terminate),
-		):
-			if condition:
-				try:
-					callback(*args)
-				except Exception:
-					pass
+		if self.use_env:
+			try:
+				self.send_env_terminate()
+			except Exception:
+				pass
 		Configuration.remove_generated()
+		if self.ui:
+			quit_app()
 
 	def _update(self):
 		try:
@@ -89,7 +88,8 @@ class Generation(ConnectionGroup):
 	def stop_game(self):
 		# TODO Reset UI
 		# TODO grey out buttons
-		# TODO send to ACQ
+		if self.use_acq:
+			self.send_acq_control_session(False)
 		if self.use_env:
 			self.send_env_quit()
 		self.reset()
