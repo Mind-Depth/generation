@@ -1,4 +1,6 @@
 attrdict
 pypiwin32
+PyQt5
+pyqtgraph
 pywin32
 queuelib
