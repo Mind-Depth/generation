@@ -1,6 +1,7 @@
 #
 import time
 import queue
+import base64
 import random
 from UI import quit_app
 from attrdict import AttrDict
@@ -168,6 +169,12 @@ class Generation(ConnectionGroup):
 			return self.handle_env_initialize()
 		if obj.type == self.env_enums.EnvironmentMessageType.RequestRoom:
 			return self.handle_env_request_room()
+		if obj.type == self.env_enums.EnvironmentMessageType.ScreenShotStart:
+			return self.handle_env_screen_shot_start()
+		if obj.type == self.env_enums.EnvironmentMessageType.ScreenShotChunk:
+			return self.handle_env_screen_shot_chunk(obj.message)
+		if obj.type == self.env_enums.EnvironmentMessageType.ScreenShotEnd:
+			return self.handle_env_screen_shot_end()
 		raise NotImplementedError(obj)
 
 	def handle_env_initialize(self):
@@ -206,6 +213,16 @@ class Generation(ConnectionGroup):
 		self.fear = fear
 		self.ui.plotText(time.time(), self.reverse_env_enums.Fears[self.fear])
 		self.send_env_room(m, models, [], fear, value)
+
+	def handle_env_screen_shot_start(self):
+		self.screen_shot_chunks = ''
+
+	def handle_env_screen_shot_chunk(self, chunk):
+		self.screen_shot_chunks += chunk
+
+	def handle_env_screen_shot_end(self):
+		if self.ui:
+			self.ui.updatePreview(base64.b64decode(self.screen_shot_chunks))
 
 	# ENV MISC
 

@@ -16,6 +16,7 @@ class Connection:
 	'''Double read & write pipes wrapper'''
 
 	CONNECTION_TIMEOUT = 100
+	MAX_STRING_SIZE = 200
 
 	def __init__(self, name):
 		'''Creates pipes objects'''
@@ -51,7 +52,8 @@ class Connection:
 		error, msg = win32file.ReadFile(self.pipe_in, Configuration.connection.chunk_size)
 		assert not error, error
 		s = msg.rstrip(b'\x00').decode()
-		self.log.info(f'Recv:{s}')
+		preview = s[:self.MAX_STRING_SIZE-3] + '...' if len(s) > self.MAX_STRING_SIZE else s
+		self.log.info(f'Recv:{preview}')
 		return None if not s else AttrDict(json.loads(s))
 
 	@_hide_legitimate_errors

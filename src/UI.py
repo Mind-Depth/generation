@@ -32,6 +32,9 @@ class StatusWindow(QtWidgets.QMainWindow):
 
 		# Preview
 		self.preview = self.findChild(QtWidgets.QLabel, 'Preview')
+		geometry = self.preview.geometry()
+		self.preview_width = geometry.width()
+		self.preview_height = geometry.height()
 		self.previewPixmap = QtGui.QPixmap()
 
 		# Graph
@@ -53,9 +56,7 @@ class StatusWindow(QtWidgets.QMainWindow):
 			minXRange = self.plot_x_minrange,
 			maxXRange = self.plot_x_maxrange,
 		)
-		self.plot_x = []
-		self.plot_y = []
-		self.plot_text_items = []
+		self.resetPlot()
 
 		# Refresh
 		self.timer = QtCore.QTimer()
@@ -64,7 +65,7 @@ class StatusWindow(QtWidgets.QMainWindow):
 
 	def updatePreview(self, value):
 		self.previewPixmap.loadFromData(value)
-		self.preview.setPixmap(self.previewPixmap)
+		self.preview.setPixmap(self.previewPixmap.scaled(self.preview_width, self.preview_height, QtCore.Qt.KeepAspectRatio))
 
 	def updateFear(self, name, value):
 		self.fears[name].setValue(int(100 * value))
@@ -77,13 +78,18 @@ class StatusWindow(QtWidgets.QMainWindow):
 		self.stop_button.setEnabled(True)
 
 	def stopSession(self):
-		# TODO reset
-		# texts
-		# plots
-		# previews
-		# progress bars
+		self.resetPlot()
+		for bar in self.fears.values():
+			bar.setValue(0)
+		self.preview.clear()
 		self.start_button.setEnabled(True)
 		self.stop_button.setEnabled(False)
+
+	def resetPlot(self):
+		self.plot.clear()
+		self.plot_x = []
+		self.plot_y = []
+		self.plot_text_items = []
 
 	def plotText(self, x, text):
 		item = pyqtgraph.TextItem(html=f'<div style="text-align: center;color: #FFFFFF;font-size: 16pt;">{text}</div>', anchor=(0, 0), border='w')
