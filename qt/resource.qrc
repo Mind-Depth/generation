@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="image">
+    <file>logo-small.jpg</file>
+    <file>logo.jpg</file>
+    <file>play.png</file>
+    <file>stop.png</file>
+  </qresource>
+  <qresource prefix="font">
+    <file>gorestep.ttf</file>
+  </qresource>
+</RCC>

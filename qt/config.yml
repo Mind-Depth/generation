@@ -1,0 +1,4 @@
+ioPaths:
+-
+ - "qt\\*.qrc"
+ - "src\\%%FILENAME%%_rc.py"

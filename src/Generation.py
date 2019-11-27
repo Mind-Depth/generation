@@ -74,6 +74,7 @@ class Generation(ConnectionGroup):
 	def reset(self):
 		self.fears = {}
 		self.afraid = False
+		self.fear_level = 0
 		self.paused = True
 		self.fear = None
 
@@ -115,9 +116,8 @@ class Generation(ConnectionGroup):
 			if self.ui:
 				self.ui.updateFear(self.reverse_env_enums.Fears[self.fear], value)
 
-		# TODO Clean and compute for real
 		if self.ui:
-			self.ui.plotXY(time.time(), int(self.afraid))
+			self.ui.plotXY(time.time(), self.fear_level)
 
 	# ENV SEND
 
@@ -204,7 +204,6 @@ class Generation(ConnectionGroup):
 		value *= value > 0
 		self.fears[fear] = value
 		self.fear = fear
-		# TODO clean
 		self.ui.plotText(time.time(), self.reverse_env_enums.Fears[self.fear])
 		self.send_env_room(m, models, [], fear, value)
 
@@ -255,4 +254,4 @@ class Generation(ConnectionGroup):
 		# obj.status_fear
 		# obj.timestamp # TODO handle older timestamp
 		self.afraid = obj.status_fear
-		# TODO plot
+		self.fear_level = int(self.afraid)
