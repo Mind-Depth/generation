@@ -13,7 +13,7 @@ class Launcher:
 
 	def exec(self):
 		self._replace_window(UI.StatusWindow(self.gen.start_game, self.gen.stop_game))
-		self.gen.start(thread=True, ui=self.window) # TODO clean
+		self.gen.start(thread=True, ui=self.window)
 		ecode = self.app()
 		self._stop()
 		return ecode
@@ -30,10 +30,8 @@ class Launcher:
 	def _stop(self):
 		self._close_window()
 		self.gen.stop()
-		# TODO close env & acq
 
 	def _error_handler(self, *exception):
-		# TODO better handling
 		self._stop()
 
 if __name__ == '__main__':

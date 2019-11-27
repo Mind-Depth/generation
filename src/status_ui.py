@@ -35,19 +35,14 @@ class Ui_MainWindow(object):
         self.Logo.setAlignment(QtCore.Qt.AlignCenter)
         self.Logo.setObjectName("Logo")
         self.Stop = QtWidgets.QPushButton(self.MainWidget)
-        self.Stop.setGeometry(QtCore.QRect(620, 20, 75, 75))
-        self.Stop.setStyleSheet("QPushButton\n"
-"{\n"
-"   background-color:#ffffff;\n"
-"}\n"
-"\n"
-"QPushButton:hover\n"
-"{\n"
-"   background-color:#bbbbbb;\n"
-"}")
+        self.Stop.setGeometry(QtCore.QRect(612, 22, 75, 75))
+        self.Stop.setStyleSheet('QPushButton { background-color:#330000 } QPushButton:hover { background-color:#990000 } :disabled { background-color:#333333 }')
+        self.Stop.setEnabled(False)
         self.Stop.setText("")
+        self.iconPx = QtGui.QPixmap(":/image/stop.png")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/image/stop.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(self.iconPx, QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(self.iconPx, QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         self.Stop.setIcon(icon)
         self.Stop.setIconSize(QtCore.QSize(125, 125))
         self.Stop.setObjectName("Stop")
@@ -67,19 +62,14 @@ class Ui_MainWindow(object):
         self.FrameTop.setMidLineWidth(2)
         self.FrameTop.setObjectName("FrameTop")
         self.Start = QtWidgets.QPushButton(self.MainWidget)
-        self.Start.setGeometry(QtCore.QRect(510, 20, 75, 75))
-        self.Start.setStyleSheet("QPushButton\n"
-"{\n"
-"   background-color:#ffffff;\n"
-"}\n"
-"\n"
-"QPushButton:hover\n"
-"{\n"
-"   background-color:#bbbbbb;\n"
-"}")
+        self.Start.setGeometry(QtCore.QRect(512, 22, 75, 75))
+        self.Start.setStyleSheet('QPushButton { background-color:#003300 } QPushButton:hover { background-color:#009900 } :disabled { background-color:#333333 }')
+        self.Start.setEnabled(False)
         self.Start.setText("")
+        self.icon1Px = QtGui.QPixmap(":/image/play.png")
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/image/play.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(self.icon1Px, QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(self.icon1Px, QtGui.QIcon.Disabled, QtGui.QIcon.Off)
         self.Start.setIcon(icon1)
         self.Start.setIconSize(QtCore.QSize(150, 150))
         self.Start.setObjectName("Start")

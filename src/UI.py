@@ -16,8 +16,10 @@ class StatusWindow(QtWidgets.QMainWindow):
 		self.setFixedSize(self.size())
 
 		# Callbacks
-		self.findChild(QtWidgets.QPushButton, 'Start').clicked.connect(start_callback)
-		self.findChild(QtWidgets.QPushButton, 'Stop').clicked.connect(stop_callback)
+		self.start_button = self.findChild(QtWidgets.QPushButton, 'Start')
+		self.stop_button = self.findChild(QtWidgets.QPushButton, 'Stop')
+		self.start_button.clicked.connect(start_callback)
+		self.stop_button.clicked.connect(stop_callback)
 
 		# ColorMap
 		colors = [(0, 255, 0), (255, 255, 0), (255, 0, 0)]
@@ -66,6 +68,22 @@ class StatusWindow(QtWidgets.QMainWindow):
 
 	def updateFear(self, name, value):
 		self.fears[name].setValue(int(100 * value))
+
+	def initSession(self):
+		self.start_button.setEnabled(True)
+
+	def startSession(self):
+		self.start_button.setEnabled(False)
+		self.stop_button.setEnabled(True)
+
+	def stopSession(self):
+		# TODO reset
+		# texts
+		# plots
+		# previews
+		# progress bars
+		self.start_button.setEnabled(True)
+		self.stop_button.setEnabled(False)
 
 	def plotText(self, x, text):
 		item = pyqtgraph.TextItem(html=f'<div style="text-align: center;color: #FFFFFF;font-size: 16pt;">{text}</div>', anchor=(0, 0), border='w')

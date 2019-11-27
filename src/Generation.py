@@ -28,7 +28,7 @@ class Generation(ConnectionGroup):
 		})
 		Configuration.remove_generated()
 		self.reverse_env_enums = AttrDict()
-		self.ui = None # TODO clean
+		self.ui = None
 		self.reset()
 		super().__init__(*self.clients)
 
@@ -41,7 +41,6 @@ class Generation(ConnectionGroup):
 	# CONNECTION GROUP
 
 	def _start(self, ui):
-		# TODO clean
 		self.ui = ui
 		if self.use_acq:
 			self.send_acq_initialize()
@@ -75,19 +74,22 @@ class Generation(ConnectionGroup):
 	def reset(self):
 		self.fears = {}
 		self.afraid = False
+		self.paused = True
 		self.fear = None
 
 	def start_game(self):
-		# TODO grey out buttons
+		if self.ui:
+			self.ui.startSession()
 		if self.use_acq:
 			self.send_acq_control_session(True)
 		if self.use_env:
 			self.fears = {fear: -1 for fear in self.env_enums.Fears.values()}
 			self.send_env_start()
+		self.paused = False
 
 	def stop_game(self):
-		# TODO Reset UI
-		# TODO grey out buttons
+		if self.ui:
+			self.ui.stopSession()
 		if self.use_acq:
 			self.send_acq_control_session(False)
 		if self.use_env:
@@ -98,8 +100,12 @@ class Generation(ConnectionGroup):
 
 		# Start game
 		if not self.disconnected_clients:
-			# TODO activate button
 			self.disconnected_clients -= 1
+			if self.ui:
+				self.ui.initSession()
+
+		if self.paused:
+			return
 
 		# Update fear level
 		if self.afraid and self.fear is not None:
