@@ -1,5 +1,4 @@
 attrdict
-base64
 pypiwin32
 PyQt5
 pyqtgraph
