@@ -160,6 +160,12 @@ class Generation(ConnectionGroup):
 			fearIntensity = fearIntensity,
 		)
 
+	def send_env_fearlevel(self, fearIntensity):
+		self.send_env_message(
+			type=self.env_enums.GenerationMessageType.FearLevel,
+			fearIntensity=fearIntensity
+		)
+
 	# ENV RECV
 
 	def handle_env_msg(self, obj):
@@ -266,9 +272,9 @@ class Generation(ConnectionGroup):
 			self.stop()
 
 	def handler_acq_fear_event(self, obj):
-		# TODO real computation
-		# obj.fear_accuracy
-		# obj.status_fear
-		# obj.timestamp # TODO handle older timestamp
-		self.afraid = obj.status_fear
-		self.fear_level = int(self.afraid)
+		self.fear_level = obj.fear_level
+		state = self.fear_level > 0.5
+		if self.afraid != state:
+			self.afraid = state
+			if self.use_env:
+				self.send_env_fearlevel(self.afraid * 1.0)
