@@ -97,9 +97,9 @@ class Ui_MainWindow(object):
         self.FrameLeft.setLineWidth(2)
         self.FrameLeft.setMidLineWidth(2)
         self.FrameLeft.setObjectName("FrameLeft")
-        self.Achluophobia = QtWidgets.QProgressBar(self.FrameLeft)
-        self.Achluophobia.setGeometry(QtCore.QRect(190, 60, 500, 30))
-        self.Achluophobia.setStyleSheet("QProgressBar:horizontal {\n"
+        self.Nyctophobia = QtWidgets.QProgressBar(self.FrameLeft)
+        self.Nyctophobia.setGeometry(QtCore.QRect(190, 60, 500, 30))
+        self.Nyctophobia.setStyleSheet("QProgressBar:horizontal {\n"
 "border: 1px solid gray;\n"
 "border-radius: 3px;\n"
 "background: black;\n"
@@ -108,13 +108,13 @@ class Ui_MainWindow(object):
 "background: qlineargradient(x1: 0, y1: 0.5, x2: 1, y2: 0.5, stop: 0 #900000, stop: 1 #000000);\n"
 "width: 10px;\n"
 "}")
-        self.Achluophobia.setMaximum(100)
-        self.Achluophobia.setProperty("value", 0)
-        self.Achluophobia.setTextVisible(False)
-        self.Achluophobia.setOrientation(QtCore.Qt.Horizontal)
-        self.Achluophobia.setInvertedAppearance(False)
-        self.Achluophobia.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
-        self.Achluophobia.setObjectName("Achluophobia")
+        self.Nyctophobia.setMaximum(100)
+        self.Nyctophobia.setProperty("value", 0)
+        self.Nyctophobia.setTextVisible(False)
+        self.Nyctophobia.setOrientation(QtCore.Qt.Horizontal)
+        self.Nyctophobia.setInvertedAppearance(False)
+        self.Nyctophobia.setTextDirection(QtWidgets.QProgressBar.TopToBottom)
+        self.Nyctophobia.setObjectName("Nyctophobia")
         self.Arachnophobia_ = QtWidgets.QLabel(self.FrameLeft)
         self.Arachnophobia_.setGeometry(QtCore.QRect(20, 160, 150, 30))
         font = QtGui.QFont()
@@ -205,18 +205,18 @@ class Ui_MainWindow(object):
 "}")
         self.Vertigo_.setAlignment(QtCore.Qt.AlignCenter)
         self.Vertigo_.setObjectName("Vertigo_")
-        self.Achluophobia_ = QtWidgets.QLabel(self.FrameLeft)
-        self.Achluophobia_.setGeometry(QtCore.QRect(20, 60, 150, 30))
+        self.Nyctophobia_ = QtWidgets.QLabel(self.FrameLeft)
+        self.Nyctophobia_.setGeometry(QtCore.QRect(20, 60, 150, 30))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
-        self.Achluophobia_.setFont(font)
-        self.Achluophobia_.setStyleSheet("QLabel {\n"
+        self.Nyctophobia_.setFont(font)
+        self.Nyctophobia_.setStyleSheet("QLabel {\n"
 "color: #bbbbbb;\n"
 "}")
-        self.Achluophobia_.setAlignment(QtCore.Qt.AlignCenter)
-        self.Achluophobia_.setObjectName("Achluophobia_")
+        self.Nyctophobia_.setAlignment(QtCore.Qt.AlignCenter)
+        self.Nyctophobia_.setObjectName("Nyctophobia_")
         self.Preview = QtWidgets.QLabel(self.MainWidget)
         self.Preview.setGeometry(QtCore.QRect(745, 145, 445, 445))
         self.Preview.setText("")
@@ -239,12 +239,12 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Mind Depths"))
-        self.Achluophobia.setFormat(_translate("MainWindow", "%p%"))
+        self.Nyctophobia.setFormat(_translate("MainWindow", "%p%"))
         self.Arachnophobia_.setText(_translate("MainWindow", "Arachnophobia"))
         self.Claustrophobia.setFormat(_translate("MainWindow", "%p%"))
         self.Arachnophobia.setFormat(_translate("MainWindow", "%p%"))
         self.Vertigo.setFormat(_translate("MainWindow", "%p%"))
         self.Claustrophobia_.setText(_translate("MainWindow", "Claustrophobia"))
         self.Vertigo_.setText(_translate("MainWindow", "Vertigo"))
-        self.Achluophobia_.setText(_translate("MainWindow", "Achluophobia"))
+        self.Nyctophobia_.setText(_translate("MainWindow", "Nyctophobia"))
 import resource_rc

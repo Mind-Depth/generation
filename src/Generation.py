@@ -191,7 +191,7 @@ class Generation(ConnectionGroup):
 		self.disconnected_clients -= 1
 
 	def _choose_fear(self):
-		MIN_CHANCE = 0.1
+		MIN_CHANCE = 0.05
 
 		# Force tests
 		tested = {}
