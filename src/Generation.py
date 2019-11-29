@@ -9,6 +9,9 @@ from collections import defaultdict
 from Connection import ConnectionGroup
 from Configuration import Configuration
 
+def clamp(value, mini, maxi):
+	return value * (maxi - mini) + mini
+
 class Generation(ConnectionGroup):
 
 	# CLASS
@@ -73,6 +76,7 @@ class Generation(ConnectionGroup):
 	# GEN WORKFLOW
 
 	def reset(self):
+		self.intro = 0
 		self.fears = {}
 		self.afraid = False
 		self.fear_level = 0
@@ -111,8 +115,7 @@ class Generation(ConnectionGroup):
 
 		# Update fear level
 		if self.afraid and self.fear is not None:
-			# TODO real computation
-			value = min(max(self.fears[self.fear] + 0.05, 0.0), 1.0)
+			value = min(max(self.fears[self.fear] + 0.01 * self.fear_level, 0.0), 1.0)
 			self.fears[self.fear] = value
 			if self.ui:
 				self.ui.updateFear(self.reverse_env_enums.Fears[self.fear], value)
@@ -187,38 +190,61 @@ class Generation(ConnectionGroup):
 		self.load_env_config()
 		self.disconnected_clients -= 1
 
-	def handle_env_request_room(self):
+	def _choose_fear(self):
+		MIN_CHANCE = 0.1
 
-		# TODO base decision differently
+		# Force tests
 		tested = {}
 		untested = {}
 		for fear, value in self.fears.items():
-			(untested if value == -1 else tested)[fear] = value
-		fears = list((untested if untested else tested).items())
-		fear, value = max(fears, key=lambda kv: kv[1])
+			(untested if value == -1 else tested)[fear] = max(value, MIN_CHANCE)
+		if untested:
+			self.fear = random.choice(list(untested.keys()))
+			self.fears[self.fear] = 0
+			return
 
-		# TODO score each map potential
-		m = random.choice(self.maps)
+		# Tower sampling
+		fears = sorted(tested.items(), key=lambda kv: kv[1], reverse=True)
+		r = random.random() * sum(tested.values())
+		for fear, value in fears:
+			r -= value
+			if r < 0:
+				break
+		self.fear = fear
 
-		# TODO score models
+	def _choose_map(self):
+		MIN_CHANCE = 0.5
+		MAX_CHANCE = 0.9
+
+		# Force intro
+		m = self.maps_intro.get(self.intro)
+		if m is not None:
+			self.intro += 1
+			return m
+
+		# Force tag
+		tagged = self.maps_tagged[self.fear]
+		if tagged and random.random() < clamp(self.fears[self.fear], MIN_CHANCE, MAX_CHANCE):
+			return random.choice(tagged)
+
+		# Pure random
+		return random.choice(self.maps_generic + tagged)
+
+	def handle_env_request_room(self):
+		self._choose_fear()
+		m = self._choose_map()
 		filtered_models = {
-			mtype: list(filter(lambda model: fear in model.fears, models))
+			mtype: list(filter(lambda model: self.fear in model.fears, models))
 			for mtype, models in self.models.items()
 		}
-
-		# TODO try to prevent duplicates
 		models = [
-				random.choice(filtered_models[category_config.type] or self.models[category_config.type]) # TODO handle empty list in another way
+				random.choice(filtered_models[category_config.type] or self.models[category_config.type])
 				for category_config in m.categories_config
 				for _ in range(random.randint(category_config.use_min, category_config.use_max))
 		]
-
-		# TODO clean
-		value *= value > 0
-		self.fears[fear] = value
-		self.fear = fear
-		self.ui.plotText(time.time(), self.reverse_env_enums.Fears[self.fear])
-		self.send_env_room(m, models, [], fear, value)
+		if self.ui:
+			self.ui.plotText(time.time(), self.reverse_env_enums.Fears[self.fear])
+		self.send_env_room(m, models, [], self.fear, self.fears[self.fear])
 
 	def handle_env_screen_shot_start(self):
 		self.screen_shot_chunks = ''
@@ -239,7 +265,16 @@ class Generation(ConnectionGroup):
 			self.env_enums[enum] = {kv[0]: kv[1] for kv in kvs}
 			self.reverse_env_enums[enum] = {kv[1]: kv[0] for kv in kvs}
 		self.env_enums.update()
-		self.maps = Configuration.loaded.maps
+		self.maps_intro = {}
+		self.maps_generic = []
+		self.maps_tagged = {fear: [] for fear in self.env_enums.Fears.values()}
+		for m in Configuration.loaded.maps:
+			if m.intro >= 0:
+				self.maps_intro[m.intro] = m
+			elif m.generic:
+				self.maps_generic.append(m)
+			else:
+				self.maps_tagged[m.fear].append(m)
 		self.models = defaultdict(list)
 		for model in Configuration.loaded.models:
 			self.models[model.type].append(model)
